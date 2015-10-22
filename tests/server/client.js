@@ -96,3 +96,17 @@ Tinytest.addAsync("Router - HTTP - Auth - Delete", function (test, next) {
 		next();
 	});
 });
+
+/* Test PubSub */
+
+Tinytest.addAsync("Router - PubSub", function (test, next) {
+	next = _.once(next);
+
+	let testCol = new Meteor.Collection('test');
+	Meteor.subscribe('pubsub-test', function(){
+		let res = testCol.findOne();
+		test.equal(res.test, 123);
+		next();
+	});
+	setTimeout(next, 10000);
+});

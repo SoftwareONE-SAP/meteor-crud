@@ -1,4 +1,14 @@
 /**
+ * Set up a test collection
+ */
+let testCol = new Meteor.Collection('test');
+Meteor.startup(() => {
+	if (testCol.find().fetch().length === 0) {
+		testCol.insert({ test: 123 });
+	}
+});
+
+/**
  * 
  */
 Tinytest.add("Router", (test) => {
@@ -18,6 +28,7 @@ Tinytest.add("Router", (test) => {
 	delete Meteor.server.method_handlers['create-test.create'];
 	delete Meteor.server.method_handlers['update-test.update'];
 	delete Meteor.server.method_handlers['delete-test.delete'];
+	delete Meteor.server.method_handlers['pubsub-test.read'];
 
 	/**
 	 * Create a new instance of the RPC router
@@ -35,17 +46,17 @@ Tinytest.add("Router", (test) => {
 			callback('INVALID');
 		}
 	};
+	crud.setAuthHandler(authenticator);
 
 	let interfaces = [
 		new CRUD.Interfaces.Method(),
 		new CRUD.Interfaces.HTTP(),
-		//new CRUD.Interfaces.Publication(),
+		new CRUD.Interfaces.Publication(),
 	];
 	interfaces.forEach(interface => {
-		interface.setAuthenticator(authenticator);
 		crud.addInterface(interface);
 	});
-
+	
 	/**
 	 * Assing some operations
 	 */
@@ -69,4 +80,7 @@ Tinytest.add("Router", (test) => {
 		return options.one - options.two;
 	});
 
+	crud.bind('pubsub-test', CRUD.TYPE_READ, {auth: false}, (options) => {
+		return testCol.find({});
+	});
 });
