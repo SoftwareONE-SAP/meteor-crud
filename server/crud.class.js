@@ -5,7 +5,7 @@ CRUD = class CRUD {
 	/**
 	 * CRUD Constructor
 	 */
-	constructor() {
+	constructor () {
 		/**
 		 * Interface container
 		 * @type {Array}
@@ -17,6 +17,22 @@ CRUD = class CRUD {
 		 * @type {Object}
 		 */
 		this._cruds = {};
+
+		/**
+		 * Set the authentication handler
+		 */
+		this._auth_handler = null;
+	}
+
+	/**
+	 * Authentication Handler
+	 * @param {Function} handler Function to handle authentication
+	 */
+	setAuthHandler (handler) {
+		if(!_.isFunction(handler))
+			throw new Error('Authentication Handler needs to be a function');
+
+		this._auth_handler = handler;
 	}
 
 	/**
@@ -31,9 +47,22 @@ CRUD = class CRUD {
 			throw new Meteor.Error("CRUD", 'Interface already added');
 
 		/**
+		 * Give the interface some context
+		 */
+		interface.setContext(this);
+
+		/**
 		 * Add the itnerface to the interface lists
 		 */
 		this._interfaces.push(interface);
+	}
+
+	/**
+	 * Authenticate a token
+	 * @return {[type]} [description]
+	 */
+	authenticate (...args) {
+		return Meteor.wrapAsync(this._auth_handler).apply(null, args);
 	}
 
 	/**

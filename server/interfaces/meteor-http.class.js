@@ -225,23 +225,22 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Start the auth validation
 		 */
-		if(options.auth === false){
+		if(options.auth === false) {
 			return complete();
 		}
 
 		/**
-		 * Check for the authenticator
+		 * Authenticate
 		 */
-		if(!this._authenticator)
-			throw new Meteor.Error("Missing authenticator");
+		try {
+			req.auth = this.getContext().authenticate(authToken);
+		}catch( e ) {
+			return this._dispatchError(res, e, 401);
+		}
 
 		/**
-		 * Authenticate Mode
+		 * Complete the request
 		 */
-		this.authenticate(authToken, (err, result) => {
-			if(err) return this._dispatchError(res, err, 401);
-			req.auth = result;
-			complete();
-		});
+		complete();
 	}
 }

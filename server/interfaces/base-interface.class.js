@@ -1,5 +1,18 @@
 
 BaseInterface = class BaseInterface {
+
+	/**
+	 * BaseInterface
+	 * @param  {CRUD} context Crud context.
+	 */
+	constructor (context) {
+		/**
+		 * Set the context if inserted
+		 */
+		if(context)
+			this.setContext(context);
+	}
+
 	/**
 	 * Bind
 	 * @return {[type]}
@@ -17,27 +30,19 @@ BaseInterface = class BaseInterface {
 	}
 
 	/**
-	 * Set the authenticator for reqesuts
-	 * @param {[type]} authenticator [description]
+	 * Setting the Crud context
+	 * @param {CRUD} context Crud instance
 	 */
-	setAuthenticator (authenticator) {
-		if(!_.isFunction(authenticator)) {
-			throw new Error("Authenticator must be a function");
-		}
-
-		/**
-		 * Authemnticator
-		 */
-		this._authenticator = authenticator;
+	setContext(context) {
+		this._context = context;
 	}
 
 	/**
-	 * Authenticate the token
-	 * @param  {[type]} token [description]
-	 * @return {[type]}       [description]
+	 * Getting the Crud context
+	 * @return {CRUD}
 	 */
-	authenticate(token, callback) {
-		this._authenticator(token, callback);
+	getContext() {
+		return this._context;
 	}
 
 	/**
