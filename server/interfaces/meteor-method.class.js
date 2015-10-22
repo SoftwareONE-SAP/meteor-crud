@@ -21,7 +21,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 	_wrapFetch(options, handler) {
 		let interface = this;
 
-		return function (...args) {
+		return (...args) => {
 			/**
 			 * Bypass authentication if required
 			 */
@@ -30,33 +30,14 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 			}
 
 			/**
-			 * Check for the authenticator
-			 */
-			if(!interface._authenticator)
-				throw new Meteor.Error("Missing authenticator");
-
-			/**
-			 * Wrap async
-			 */
-			let syncAuth = Meteor.wrapAsync(interface.authenticate, interface);
-			
-			/**
-			 * Authentication is required for this method so we need to
-			 * make sure that the first argument is a string
-			 */
-			if(!args.length || !_.isString(args[0])){
-				throw new Meteor.Error("Authenticaton Required, first parameter needs to be token.");
-			}
-
-			/**
-			 * Authenticate
-			 * execptions will be throw by the wrapAsync
-			 */
-			try {
-				this.auth = syncAuth(args.shift());
-			} catch (err) {
-				throw new Meteor.Error(err.message);
-			}
+		 	* Authenticate
+		 	*/
+		 	let authToken = _.isString(args[0]) ? args.shift() : null;
+		 	try {
+		 		this.auth = this.getContext().authenticate(authToken);
+		 	} catch (err) {
+		 		throw(new Meteor.Error(err.message));
+		 	}
 
 			/**
 			 * Call the handler
