@@ -129,14 +129,21 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Firstly check the headers
 		 */
-		let token = req.headers['x-auth-token'] || req.headers['authorization'];
+		let token = req.headers['x-auth-token'] || req.headers['authorization'] || null;
 
 		/***
 		 * Next we try the query string
 		 */
 		if(!token) {
 			let parsedQuery = qs.parse(req._parsedUrl.query);
-			token = parsedQuery['auth'] || parsedQuery['access-token'];
+			token = parsedQuery['auth'] || parsedQuery['access-token'] || null;
+
+			/**
+			 * If we receive a auth id we sometimes senc the secret as an extra parameter
+			 */
+			if(token && 'secret' in parsedQuery) {
+				token = token + ":" + parsedQuery['secret'];
+			}
 		}
 
 		return token;
