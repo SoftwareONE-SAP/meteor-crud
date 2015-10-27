@@ -9,9 +9,12 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 	 */
 	bind (name, type, options, handler) {
 		let methods = {};
-		let nameFull = [name, CRUD.TYPES[type]].join('.');
 
-		methods[nameFull] = this._wrapFetch(options, handler);
+		let crudName = CRUD.TYPES[type];
+		if (crudName !== 'read')
+			name += '.' + crudName;
+
+		methods[name] = this._wrapFetch(options, handler);
 		Meteor.methods(methods);
 	}
 

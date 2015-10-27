@@ -23,12 +23,12 @@ Tinytest.add("Router", (test) => {
 	/**
 	 * Remove methods
 	 */
-	delete Meteor.server.method_handlers['read-test-no-auth.read'];
-	delete Meteor.server.method_handlers['read-test-auth.read'];
+	delete Meteor.server.method_handlers['read-test-no-auth'];
+	delete Meteor.server.method_handlers['read-test-auth'];
 	delete Meteor.server.method_handlers['create-test.create'];
 	delete Meteor.server.method_handlers['update-test.update'];
 	delete Meteor.server.method_handlers['delete-test.delete'];
-	delete Meteor.server.method_handlers['pubsub-test.read'];
+	delete Meteor.server.method_handlers['pubsub-test'];
 
 	/**
 	 * Create a new instance of the RPC router

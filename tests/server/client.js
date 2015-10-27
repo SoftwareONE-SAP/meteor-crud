@@ -9,21 +9,21 @@ Tinytest.add("Router", (test) => {
  */
 
 Tinytest.addAsync("Router - Methods - Auth - Missing", function (test, next) {
-	Meteor.call("read-test-auth.read", function (err, one) {
+	Meteor.call("read-test-auth", function (err, one) {
 		test.instanceOf(err, Error, "Expected missing auth error");
 		next();
 	});
 });
 
 Tinytest.addAsync("Router - Methods - Auth - Failure", function (test, next) {
-	Meteor.call("read-test-auth.read", "INVALID", function (err, one) {
+	Meteor.call("read-test-auth", "INVALID", function (err, one) {
 		test.instanceOf(err, Error, "Expected auth failure error");
 		next();
 	});
 });
 
 Tinytest.addAsync("Router - Methods - Auth - Success", function (test, next) {
-	Meteor.call("read-test-auth.read", "VALID", function (err, one) {
+	Meteor.call("read-test-auth", "VALID", function (err, one) {
 		test.isUndefined(err, "Expected undefined err");
 		test.equal(one, 1, `Expected 1. Got ${one}`);
 		next();
