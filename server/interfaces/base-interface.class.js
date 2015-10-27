@@ -46,6 +46,16 @@ BaseInterface = class BaseInterface {
 	}
 
 	/**
+	 * Converts an error message/object to a string
+	 */
+	normalizeError(err) {
+		if(err instanceof Meteor.Error) return err.error;
+		if(err instanceof Error)        return err.message;
+		if(typeof err === 'string')     return err;
+		return 'Internal Server Error';
+	}
+
+	/**
 	 * Fetch a result set if the value is a cursor
 	 * @return {Object}
 	 */
