@@ -10,11 +10,9 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 	bind (name, type, options, handler) {
 		/**
 		 * We only ever expose READ functions over a publication
-		 * as we 
 		 */
-		if(type !== CRUD.TYPE_READ)
-			console.log(`PUBLICATION: Ignoring ${name}::${type}`);
-
+		if(type !== CRUD.TYPE_READ) return;
+		
 		Meteor.publish(name, this._wrapFetch(options, handler));
 	}
 
@@ -25,26 +23,27 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 		let interface = this;
 
 		return (...args) => {
-			/**
-			 * Bypass authentication if required
-			 */
-			if(options.auth === false)
-				return handler.apply(this, args);
 
 			/**
-		 	* Authenticate
-		 	*/
-		 	let authToken = _.isString(args[0]) ? args.shift() : null;
-		 	try {
-		 		this.auth = this.getContext().authenticate(authToken);
-			} catch (err) {
-		 		throw(new Meteor.Error(err.message));
-		 	}
+			 * Authentication if required
+			 */
+			if (options.auth !== false) {
+			 	let authToken = _.isString(args[0]) ? args.shift() : null;
+			 	try {
+			 		this.auth = this.getContext().authenticate(authToken);
+				} catch (err) {
+					throw new Meteor.Error(this.normalizeError(err));
+			 	}
+			}
 
 			/**
 			 * Call the handler
 			 */
-			return handler.apply(this, args);
+			try {
+				return handler.apply(this, args);
+			} catch (err) {
+				throw new Meteor.Error(this.normalizeError(err));
+			}
 		}
 	}
 }

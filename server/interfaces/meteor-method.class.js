@@ -22,27 +22,27 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 		let interface = this;
 
 		return (...args) => {
-			/**
-			 * Bypass authentication if required
-			 */
-			if(options.auth === false){
-				return interface._fetch(handler.apply(this, args));
-			}
 
 			/**
-		 	* Authenticate
-		 	*/
-		 	let authToken = _.isString(args[0]) ? args.shift() : null;
-		 	try {
-		 		this.auth = this.getContext().authenticate(authToken);
-		 	} catch (err) {
-		 		throw(new Meteor.Error(err.message));
-		 	}
+			 * Authentication if required
+			 */
+			if (options.auth !== false) {
+				let authToken = _.isString(args[0]) ? args.shift() : null;
+		 		try {
+		 			this.auth = this.getContext().authenticate(authToken);
+		 		} catch (err) {
+		 			throw new Meteor.Error(this.normalizeError(err));
+		 		}
+			}
 
 			/**
 			 * Call the handler
 			 */
-			return interface._fetch(handler.apply(this, args));
+			try {
+				return interface._fetch(handler.apply(this, args));
+			} catch (err) {
+				throw new Meteor.Error(this.normalizeError(err)); 
+			}
 		}
 	}
 }

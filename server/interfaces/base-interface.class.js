@@ -64,7 +64,14 @@ BaseInterface = class BaseInterface {
 			/**
 			 * @todo Paginate here ??
 			 */
-			return val.fetch();
+			val = val.fetch();
+		}
+
+		/**
+		 * If we are using astronomy then call the astronomy objects raw method
+		 */
+		if (_.isArray(val) && val.length && _.isFunction(val[0].raw)) {
+			val = val.map(doc => doc.raw());
 		}
 
 		return val;

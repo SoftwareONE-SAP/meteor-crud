@@ -167,16 +167,9 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Number} 	code Status code
 	 */
 	_dispatchError(res, err, code) {
-		if(err instanceof Error)
-			return this._dispatch(res, {error: err.message}, code || 500);
-
-		if(err instanceof Object)
-			return this._dispatch(res, err, code || 500);
-
-		if(err instanceof String)
-			return this._dispatch(res, {error: err}, code || 500);
-
-		return this._dispatch(res, {error: "Internal server error."}, code || 500);
+		return this._dispatch(res, {
+			error: this.normalizeError(err)
+		}, code || 500);
 	}
 
 	/**
