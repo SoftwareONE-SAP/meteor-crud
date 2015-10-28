@@ -13,37 +13,18 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 		 */
 		if(type !== CRUD.TYPE_READ) return;
 		
-		Meteor.publish(name, this._wrapFetch(options, handler));
+		handler = this.getContext()._wrapBefore(this, name, type, options, handler);
+
+		Meteor.publish(name, this._wrapFetch(handler));
 	}
 
-	/**
-	 * 
-	 */
-	_wrapFetch(options, handler) {
-		let interface = this;
-
+	_wrapFetch(handler) {
 		return (...args) => {
-
-			/**
-			 * Authentication if required
-			 */
-			if (options.auth !== false) {
-			 	let authToken = _.isString(args[0]) ? args.shift() : null;
-			 	try {
-			 		this.auth = this.getContext().authenticate(authToken);
-				} catch (err) {
-					throw new Meteor.Error(this.normalizeError(err));
-			 	}
-			}
-
-			/**
-			 * Call the handler
-			 */
 			try {
-				return handler.apply(this, args);
+				return handler.call(this, ...args);
 			} catch (err) {
-				throw new Meteor.Error(this.normalizeError(err));
+				throw new Meteor.Error(this.normalizeError(err)); 
 			}
-		}
+		};
 	}
 }

@@ -14,38 +14,20 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 		if (crudName !== 'read')
 			name += '.' + crudName;
 
-		methods[name] = this._wrapFetch(options, handler);
+		handler = this.getContext()._wrapBefore(this, name, type, options, handler);
+
+		methods[name] = this._wrapFetch(handler);
+
 		Meteor.methods(methods);
 	}
 
-	/**
-	 * 
-	 */
-	_wrapFetch(options, handler) {
-		let interface = this;
-
+	_wrapFetch(handler) {
 		return (...args) => {
-
-			/**
-			 * Authentication if required
-			 */
-			if (options.auth !== false) {
-				let authToken = _.isString(args[0]) ? args.shift() : null;
-		 		try {
-		 			this.auth = this.getContext().authenticate(authToken);
-		 		} catch (err) {
-		 			throw new Meteor.Error(this.normalizeError(err));
-		 		}
-			}
-
-			/**
-			 * Call the handler
-			 */
 			try {
-				return interface._fetch(handler.apply(this, args));
+				return this._fetch(handler.call(this, ...args));
 			} catch (err) {
 				throw new Meteor.Error(this.normalizeError(err)); 
 			}
-		}
+		};
 	}
 }

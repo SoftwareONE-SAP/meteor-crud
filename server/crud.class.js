@@ -19,20 +19,20 @@ CRUD = class CRUD {
 		this._cruds = {};
 
 		/**
-		 * Set the authentication handler
+		 * Handlers to run on all requests
+		 * before they hit the main bound handler
 		 */
-		this._auth_handler = null;
+		this._before = [];
 	}
 
 	/**
-	 * Authentication Handler
-	 * @param {Function} handler Function to handle authentication
+	 * Converts an error message/object to a string
 	 */
-	setAuthHandler (handler) {
-		if(!_.isFunction(handler))
-			throw new Error('Authentication Handler needs to be a function');
-
-		this._auth_handler = handler;
+	normalizeError(err) {
+		if(err instanceof Meteor.Error) return err.error;
+		if(err instanceof Error)        return err.message;
+		if(typeof err === 'string')     return err;
+		return 'Internal Server Error';
 	}
 
 	/**
@@ -58,11 +58,38 @@ CRUD = class CRUD {
 	}
 
 	/**
-	 * Authenticate a token
-	 * @return {[type]} [description]
+	 * Add handlers to run on all requests, before the bound one
 	 */
-	authenticate (...args) {
-		return Meteor.wrapAsync(this._auth_handler).apply(null, args);
+	before(handler) {
+		this._before.push(handler);
+	}
+
+	/**
+	 * Wraps a request handler in a function which runs all of the
+	 * "before" functions in order to fix-up the request, before
+	 * running the main request handler. Parameters are passed
+	 * through to each before handler.
+	 * 
+	 * @param  {object}   context The "this" object in handlers
+	 * @param  {string}   name    Name of the binding
+	 * @param  {number}   type    CRUD type
+	 * @param  {object}   options Options for the binding
+	 * @param  {function} handler Main handler
+	 * @return {function}         The wrapper function
+	 */
+	_wrapBefore(context, name, type, options, handler) {
+		return (...args) => {
+			let beforeHandler;
+			for (beforeHandler of this._before) {
+				try {
+					let syncBeforeHandler = Meteor.wrapAsync(beforeHandler.bind(context));
+					syncBeforeHandler(name, type, options, args);
+				} catch (err) {
+					throw new Meteor.Error(this.normalizeError(err));
+				}
+			}
+			return handler.call(context, ...args);
+		};
 	}
 
 	/**

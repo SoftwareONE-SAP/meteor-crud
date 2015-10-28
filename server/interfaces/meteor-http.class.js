@@ -77,7 +77,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Push the RPC into the handlersrpc
 		 */
-		this._handlers[verb][path] = {options, rpc};
+		this._handlers[verb][path] = {name, type, options, rpc};
 	}
 
 	/**
@@ -118,35 +118,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Return the options
 		 */
-		return [options];
-	}
-
-	/**
-	 * Authenticate a request
-	 * @return {void}
-	 */
-	getAuthToken(req) {
-		/**
-		 * Firstly check the headers
-		 */
-		let token = req.headers['x-auth-token'] || req.headers['authorization'] || null;
-
-		/***
-		 * Next we try the query string
-		 */
-		if(!token) {
-			let parsedQuery = qs.parse(req._parsedUrl.query);
-			token = parsedQuery['auth'] || parsedQuery['access-token'] || null;
-
-			/**
-			 * If we receive a auth id we sometimes senc the secret as an extra parameter
-			 */
-			if(token && 'secret' in parsedQuery) {
-				token = token + ":" + parsedQuery['secret'];
-			}
-		}
-
-		return token;
+		return options;
 	}
 
 	/**
@@ -179,6 +151,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Function}   next [description]
 	 */
 	_intercept(req, res, next) {
+		
 		/**
 		 * dirty check to exclude none crud operations
 		 */
@@ -196,51 +169,17 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		 * Fetch the procedure
 		 * @type {Function}
 		 */
-		let procedure = this._handlers[req.method][req._parsedUrl.pathname].rpc;
-
-		/**
-		 * Fetch the procedure
-		 * @type {Function}
-		 */
-		let options = this._handlers[req.method][req._parsedUrl.pathname].options;
+		let data = this._handlers[req.method][req._parsedUrl.pathname]
+		let rpc  = this.getContext()._wrapBefore(req, data.name, data.type, data.options, data.rpc);
 
 		/**
 		 * Marshal the payload
 		 */
 		let payload = this._unmarshal(req);
-
-		/**
-		 * Fetch the auth token
-		 */
-		let authToken = this.getAuthToken(req);
-
-		let complete = () => {
-			try{
-				this._dispatch(res, this._fetch(procedure.apply(req, payload)), 200);
-			}catch(e) {
-				this._dispatchError(res, e, 500);
-			}
+		try{
+			this._dispatch(res, this._fetch(rpc(payload)), 200);
+		}catch(e) {
+			this._dispatchError(res, e, 500);
 		}
-
-		/**
-		 * Start the auth validation
-		 */
-		if(options.auth === false) {
-			return complete();
-		}
-
-		/**
-		 * Authenticate
-		 */
-		try {
-			req.auth = this.getContext().authenticate(authToken);
-		}catch( e ) {
-			return this._dispatchError(res, e, 401);
-		}
-
-		/**
-		 * Complete the request
-		 */
-		complete();
 	}
 }
