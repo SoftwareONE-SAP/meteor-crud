@@ -118,7 +118,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Return the options
 		 */
-		return options;
+		return [options];
 	}
 
 	/**
@@ -169,16 +169,13 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		 * Fetch the procedure
 		 * @type {Function}
 		 */
-		let data = this._handlers[req.method][req._parsedUrl.pathname]
-		let rpc  = this.getContext()._wrapBefore(req, data.name, data.type, data.options, data.rpc);
+		const data = this._handlers[req.method][req._parsedUrl.pathname]
 
-		/**
-		 * Marshal the payload
-		 */
-		let payload = this._unmarshal(req);
-		try{
-			this._dispatch(res, this._fetch(rpc(payload)), 200);
-		}catch(e) {
+		try {
+			const args   = this._unmarshal(req);
+			const result = this.getContext().run(req, data.name, data.type, data.options, args, data.rpc);
+			this._dispatch(res, this._fetch(result), 200);
+		} catch (e) {
 			this._dispatchError(res, e, 500);
 		}
 	}

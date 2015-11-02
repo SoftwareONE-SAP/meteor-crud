@@ -65,31 +65,24 @@ CRUD = class CRUD {
 	}
 
 	/**
-	 * Wraps a request handler in a function which runs all of the
-	 * "before" functions in order to fix-up the request, before
-	 * running the main request handler. Parameters are passed
-	 * through to each before handler.
+	 * Run all of the "before" handlers synchronously and then run
+	 * the request specific handler, with the same context.
 	 * 
 	 * @param  {object}   context The "this" object in handlers
 	 * @param  {string}   name    Name of the binding
 	 * @param  {number}   type    CRUD type
 	 * @param  {object}   options Options for the binding
 	 * @param  {function} handler Main handler
-	 * @return {function}         The wrapper function
+	 * @return {function}         The result of running the final handler
 	 */
-	_wrapBefore(context, name, type, options, handler) {
-		return (...args) => {
-			let beforeHandler;
-			for (beforeHandler of this._before) {
-				try {
-					let syncBeforeHandler = Meteor.wrapAsync(beforeHandler.bind(context));
-					syncBeforeHandler(name, type, options, args);
-				} catch (err) {
-					throw new Meteor.Error(this.normalizeError(err));
-				}
-			}
-			return handler.call(context, ...args);
-		};
+
+	run(context, name, type, options, args, handler) {
+		let beforeHandler;
+		for (beforeHandler of this._before) {
+			let syncBeforeHandler = Meteor.wrapAsync(beforeHandler.bind(context));
+			syncBeforeHandler(name, type, options, args);
+		}
+		return handler.call(context, ...args);
 	}
 
 	/**

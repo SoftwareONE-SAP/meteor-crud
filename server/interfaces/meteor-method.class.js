@@ -8,26 +8,23 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 	 * @return {[type]} [description]
 	 */
 	bind (name, type, options, handler) {
-		let methods = {};
+		const self = this;
 
-		let crudName = CRUD.TYPES[type];
+		const crudName = CRUD.TYPES[type];
 		if (crudName !== 'read')
 			name += '.' + crudName;
 
-		handler = this.getContext()._wrapBefore(this, name, type, options, handler);
+		let methods = {};
 
-		methods[name] = this._wrapFetch(handler);
-
-		Meteor.methods(methods);
-	}
-
-	_wrapFetch(handler) {
-		return (...args) => {
+		methods[ name ] = function (...args) {
 			try {
-				return this._fetch(handler.call(this, ...args));
+				const res = self.getContext().run(this, name, type, options, args, handler);
+				return self._fetch(res);
 			} catch (err) {
-				throw new Meteor.Error(this.normalizeError(err)); 
+				throw new Meteor.Error(self.normalizeError(err));
 			}
 		};
+
+		Meteor.methods(methods);
 	}
 }
