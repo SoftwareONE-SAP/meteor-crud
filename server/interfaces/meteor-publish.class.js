@@ -3,24 +3,32 @@
  */
 MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
-	/**
-	 * Bind a call
-	 * @return {[type]} [description]
-	 */
-	bind (name, type, options, handler) {
-		const self = this;
+	name () { return 'Publish' }
 
-		/**
-		 * We only ever expose READ functions over a publication
-		 */
+	use (name, type) {
+		const interface = this;
+		const crud = interface.getContext();
+
 		if(type !== CRUD.TYPE_READ) return;
-	
-		Meteor.publish(name, function (...args) {
+
+		Meteor.publish(name, function (args={}) {
+			if (typeof args !== 'object') {
+				throw new Meteor.Error("invalid_args");
+			}
+
+			const handler = Meteor.wrapAsync(crud.handle.bind(crud));
+
+			let req = { interface, type, name, args };
+
 			try {
-				return self.getContext().run(this, name, type, options, args, handler);
+				let result = handler(this, req);
+				if (this._transformer) {
+					result = this._transformer(result);
+				}
+				return result;
 			} catch (err) {
-				throw new Meteor.Error(self.normalizeError(err));
-			}	
+				throw new Meteor.Error(interface.normalizeError(err));
+			}
 		});
 	}
 }

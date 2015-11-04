@@ -13,21 +13,26 @@ BaseInterface = class BaseInterface {
 			this.setContext(context);
 	}
 
-	/**
-	 * Bind
-	 * @return {[type]}
-	 */
-	bind() {
-		throw new Meteor.Error("rpc.interface", "Bind is not implemented");
+	setTransformer(transformer) {
+		this._transformer = transformer;
 	}
 
 	/**
-	 * Unbind
-	 * @return {[type]} [description]
+	 * Use
+	 * @return {[type]}
 	 */
-	unbind() {
-		throw new Meteor.Error("rpc.interface", "Bind is not implemented");
+	use() {
+		throw new Meteor.Error("Crud.interface", "use is not implemented");
 	}
+
+	/**
+	 * Name
+	 * @return {[name]}
+	 */
+	name() {
+		throw new Meteor.Error("Crud.interface", "name is not implemented");
+	}
+
 
 	/**
 	 * Setting the Crud context
@@ -50,27 +55,5 @@ BaseInterface = class BaseInterface {
 	 */
 	normalizeError(err) {
 		return this.getContext().normalizeError(err);
-	}
-
-	/**
-	 * Fetch a result set if the value is a cursor
-	 * @return {Object}
-	 */
-	_fetch(val) {
-		if(_.isObject(val) && 'fetch' in val && _.isFunction(val.fetch)) {
-			/**
-			 * @todo Paginate here ??
-			 */
-			val = val.fetch();
-		}
-
-		/**
-		 * If we are using astronomy then call the astronomy objects raw method
-		 */
-		if (_.isArray(val) && val.length && _.isFunction(val[0].raw)) {
-			val = val.map(doc => doc.raw());
-		}
-
-		return val;
 	}
 }

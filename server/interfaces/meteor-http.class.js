@@ -8,6 +8,9 @@ let bodyParser 	= Npm.require('body-parser');
  * 
  */
 MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
+
+	name () { return 'HTTP' }
+
 	/**
 	 * Constructor
 	 */
@@ -59,28 +62,6 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	}
 
 	/**
-	 * Bind a call
-	 * @return {[type]} [description]
-	 */
-	bind (name, type, options, rpc) {
-		/**
-		 * Convert the type to a verb
-		 */
-		let verb = this._verbize(type);
-
-		/**
-		 * Currently we swap the dont notation to slashes to make it
-		 * rest like
-		 */
-		let path = this._pathize(name);
-
-		/**
-		 * Push the RPC into the handlersrpc
-		 */
-		this._handlers[verb][path] = {name, type, options, rpc};
-	}
-
-	/**
 	 * Get the HTTP equivilent to the CRUD type
 	 * @param  {String} type CRUD type
 	 * @return {String}      HTTP Verb
@@ -118,7 +99,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		/**
 		 * Return the options
 		 */
-		return [options];
+		return options;
 	}
 
 	/**
@@ -151,7 +132,9 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Function}   next [description]
 	 */
 	_intercept(req, res, next) {
-		
+		const interface = this;
+		const crud = interface.getContext();
+
 		/**
 		 * dirty check to exclude none crud operations
 		 */
@@ -171,12 +154,44 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		 */
 		const data = this._handlers[req.method][req._parsedUrl.pathname]
 
+		const args    = this._unmarshal(req);
+		const handler = Meteor.wrapAsync(crud.handle.bind(crud));
+
 		try {
-			const args   = this._unmarshal(req);
-			const result = this.getContext().run(req, data.name, data.type, data.options, args, data.rpc);
-			this._dispatch(res, this._fetch(result), 200);
-		} catch (e) {
-			this._dispatchError(res, e, 500);
+			let result = handler(req, {
+				interface,
+				type: data.type,
+				name: data.name,
+				args,		
+			});
+			if (typeof result === 'object' && typeof result.fetch === 'function') {
+				result = result.fetch();
+			}
+			if (this._transformer) {
+				result = this._transformer(result);
+			}
+			this._dispatch(res, result, 200);
+		} catch (err) {
+			this._dispatchError(res, err, 500);
 		}
+		
+	}
+
+	use (name, type) {
+		const interface = this;
+		const crud = interface.getContext();
+
+		/**
+		 * Convert the type to a verb
+		 */
+		let verb = this._verbize(type);
+
+		/**
+		 * Currently we swap the dont notation to slashes to make it
+		 * rest like
+		 */
+		let path = this._pathize(name);
+
+		this._handlers[verb][path] = { name, type };
 	}
 }

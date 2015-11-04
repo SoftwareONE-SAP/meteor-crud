@@ -12,17 +12,7 @@ CRUD = class CRUD {
 		 */
 		this._interfaces = [];
 
-		/**
-		 * CRUD Container
-		 * @type {Object}
-		 */
-		this._cruds = {};
-
-		/**
-		 * Handlers to run on all requests
-		 * before they hit the main bound handler
-		 */
-		this._before = [];
+		this._routes = [];
 	}
 
 	/**
@@ -58,74 +48,119 @@ CRUD = class CRUD {
 	}
 
 	/**
-	 * Add handlers to run on all requests, before the bound one
-	 */
-	before(handler) {
-		this._before.push(handler);
-	}
-
-	/**
-	 * Run all of the "before" handlers synchronously and then run
-	 * the request specific handler, with the same context.
-	 * 
-	 * @param  {object}   context The "this" object in handlers
-	 * @param  {string}   name    Name of the binding
-	 * @param  {number}   type    CRUD type
-	 * @param  {object}   options Options for the binding
-	 * @param  {function} handler Main handler
-	 * @return {function}         The result of running the final handler
+	 * Register a route.
+	 * @param {[string]}   name    Optional name to match against
+	 * @param {[number]}   type    Optional crud type
+	 * @param {[function]} handler Handler to be called
+	 *
+	 * 1. crud.use("notifications", CRUD.TYPE_READ, function (req, res, next){});
+	 * 2. crud.use("notifications", function (req, res, next){});
+	 * 3. crud.use(CRUD.TYPE_READ, function (req, res, next){});
+	 * 4. crud.use(function (req, res, next){});
+	 *
+	 * 1. The handler is called for any READ "notifications" requests
+	 * 2. The handler is called for any type of "notification" requests
+	 * 3. The handler is called for any READ requests
+	 * 4. The handler is called for all requests
 	 */
 
-	run(context, name, type, options, args, handler) {
-		let beforeHandler;
-		for (beforeHandler of this._before) {
-			let syncBeforeHandler = Meteor.wrapAsync(beforeHandler.bind(context));
-			syncBeforeHandler(name, type, options, args);
+	use (...args) {
+		const handler = args.pop();
+
+		let name, type;
+		if (args.length === 2) {
+			name = args[0];
+			type = args[1];
+		} else if (args.length === 1) {
+			if (typeof args[0] === 'string') name = args[0];
+			if (typeof args[0] === 'number') type = args[1];
 		}
-		return handler.call(context, ...args);
+
+		let error = handler.length === 4;
+
+		this._routes.push({ name, type, handler, error });
+		this._interfaces.forEach(interface => {
+			try {
+				interface.use(name, type);
+			} catch (err) {
+				// @todo - Die here
+			}
+		});
 	}
 
-	/**
-	 * Bind a method
-	 * @param {String} name CRUD Name
-	 * @param {String} type The CRUD Operation
-	 * @param {Object} options options for setting up the CRUD Bindings
-	 * @param {Function} handler CRUD function to call when required
-	 * @return {Boolean} if the CRUD was setup
-	 */
-	bind(name, type, options, handler) {
-		check(name, String);
-		check(type, Match.OneOf(CRUD.TYPE_CREATE, CRUD.TYPE_READ, CRUD.TYPE_UPDATE, CRUD.TYPE_DELETE));
-		check(options, Object);
-		check(handler, Function);
-
-		/**
-		 * Setup the namespace index
-		 * @type {String}
-		 */
-		name = this._namespace(name, type);
-
-		/**
-		 * Make sure the name hasnt already been registered
-		 */
-		if(name in this._cruds)
-			throw new Meteor.Error("rpc", "Unable to register ({name}), already regsitered");
-
-		/**
-		 * Let all the itnerfaces know about our methods
-		 */
-		_.each(this._interfaces, (interface) => {
-			interface.bind(name, type, options, handler);
-		})
+	create (...args) {
+		let pass = [];
+		pass.push(args.pop());
+		pass.unshift(CRUD.TYPE_CREATE);
+		if (args.length) pass.unshift(args.pop());
+		return this.use(...pass);
 	}
 
-	/**
-	 * Unbind a RPC
-	 * @param  {String} name CRUD Name
-	 * @param  {String} type Crud operation
-	 * @return {Boolean}     if the RPC was removed
-	 */
-	unbind(name, type) {}
+	read (...args) {
+		let pass = [];
+		pass.push(args.pop());
+		pass.unshift(CRUD.TYPE_READ);
+		if (args.length) pass.unshift(args.pop());
+		return this.use(...pass);
+	}
+	
+	update (...args) {
+		let pass = [];
+		pass.push(args.pop());
+		pass.unshift(CRUD.TYPE_UPDATE);
+		if (args.length) pass.unshift(args.pop());
+		return this.use(...pass);
+	}
+
+	del (...args) {
+		let pass = [];
+		pass.push(args.pop());
+		pass.unshift(CRUD.TYPE_DELETE);
+		if (args.length) pass.unshift(args.pop());
+		return this.use(...pass);
+	}
+
+	handle (context, req, done) {
+
+		let error;
+		let toSend;
+
+		let res = {
+			send: (data) => {
+				if (typeof toSend !== 'undefined') {
+					throw "Already specified data to send";
+				}
+				toSend = data;
+			},
+			end: (data) => {
+				if (typeof data !== 'undefined') res.send(data);
+				this._done = true;
+				return done(null, toSend);
+			}
+		};
+
+		const run = (i=0) => {
+			if (res._done) {
+				throw "Can not call next after finishing response";
+			}
+
+			if (i >= this._routes.length) {
+				return done(error||404);
+			}
+
+			const route = this._routes[i];
+			if (route.name && route.name !== req.name) return run(i+1);
+			if (route.type && route.type !== req.type) return run(i+1);
+			if (route.error !== !!error) return run(i+1);
+			route.handler.call(context, req, res, err => {
+				if (typeof err !== 'undefined') {
+					error = err;
+				}
+				run(i+1)
+			});
+		};
+		run();
+	}
 
 	/**
 	 * Create a unique namespace for the rpc name and call type
