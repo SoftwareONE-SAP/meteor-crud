@@ -9,13 +9,12 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 		const interface = this;
 		const crud = interface.getContext();
 
-		const crudName = CRUD.TYPES[type];
-		if (crudName !== 'read')
-			name += '.' + crudName;
+		const crudName   = CRUD.TYPES[type];
+		const methodName = crudName === 'read' ? name : name + '.' + crudName;
 
 		let methods = {};
 
-		methods[ name ] = function (args={}) {
+		methods[ methodName ] = function (args={}) {
 			if (typeof args !== 'object') {
 				throw new Meteor.Error("invalid_args");
 			}
