@@ -111,6 +111,20 @@ Meteor.call('products.delete');
 
 Publications only make sense in a READ context. So if you register a CREATE, UPDATE or DELETE handler, a publication wont be created.
 
+One other thing to note, if you use full stops in your method name, they are converted to forward slashes for HTTP requests. So if you made a handler for adding "computers" to your products list:
+
+```javascript
+Crud.create('products.computer', request_handler);
+```
+
+It would be called any one of these three ways:
+
+```javascript
+1. Meteor.call('products.computer.create');
+2. Meteor.subscribe('products.computer.create');
+3. HTTP POST /rpc/products/computer
+```
+
 ## Request handlers
 
 A request handler is a function which is called with three arguments:
@@ -277,7 +291,7 @@ Crud.create('products', function(req, res, next){
 
 The reason we have `res.send` is in case you want to specify what data to send in this handler, but you want a subsequent handler to do something else before the request ends.
 
-You can also pass a Mongo cursor to res.send or res.send. When necessary (for HTTP requests and method calls), the library will resolve the data from that cursor before passing it back to the client. For publications however, it will treat the cursor as a reactive data source.
+You can also pass a Mongo cursor to res.send or res.end. When necessary (for HTTP requests and method calls), the library will resolve the data from that cursor before passing it back to the client. For publications however, it will treat the cursor as a reactive data source.
 
 ### `next`
 
@@ -290,7 +304,7 @@ Crud.use(function(req, res, next){
 });
 ```
 
-Like when using Connect, `next` can optionally be called with a single argument if you've decided that the request should generate an error response. At that point, the next matching error handler is run instead.
+Like when using Connect, `next` can optionally be called with a single argument if you've decided that the request should generate an error response. At that point, the next matching error handler is run instead. Throwing an error triggers the same behaviour.
 
 ## Middleware
 
