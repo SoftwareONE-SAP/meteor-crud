@@ -20,7 +20,7 @@ Crud.read('products', function (req, res, next) {
 
 Given the above code, it would be possible to retrieve the list of products in three separate ways:
 
-```javascript
+```
 1. Meteor.subscribe('products');
 2. Meteor.call('products');
 3. HTTP GET /rpc/products
@@ -62,7 +62,7 @@ Once an interface has been added, your application will immediately start proces
 
 So there are four ways to call use:
 
-```javascript
+```
 1. Crud.use("products", CRUD.TYPE_READ, function (req, res, next){});
 2. Crud.use("products", function (req, res, next){});
 3. Crud.use(CRUD.TYPE_READ, function (req, res, next){});
@@ -119,7 +119,7 @@ Crud.create('products.computer', request_handler);
 
 It would be called any one of these three ways:
 
-```javascript
+```
 1. Meteor.call('products.computer.create');
 2. Meteor.subscribe('products.computer.create');
 3. HTTP POST /rpc/products/computer
