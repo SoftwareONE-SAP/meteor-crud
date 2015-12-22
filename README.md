@@ -40,7 +40,7 @@ Throughout the rest of this documentation assume `Crud` is an instance of the `C
 
 ### addInterface(interface)
 
-The first thing you need to do after creating an instance of the CRUD class is register some interfaces. An "interface" is a class which provides functionality to expose request handlers to clients. This library comes with three built in interfaces (HTTP, Method and Publication), but you can always [write your own](#interfaces). To add interfaces:
+The first thing you need to do after creating an instance of the CRUD class is register some interfaces. An "interface" is a class which provides functionality to expose request handlers to clients. This library comes with three built in interfaces (HTTP, Method and Publication), but you can always [write your own](#custom-interfaces). To add interfaces:
 
 ```javascript
 Crud.addInterface(new CRUD.Interfaces.Publication());
