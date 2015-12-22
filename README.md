@@ -30,7 +30,7 @@ Because `res.end()` was passed a Mongo cursor rather than array, the publication
 
 ## CRUD Class
 
-The CRUD class is the core of the application. It handles registering interfaces and request handlers, normalising incoming requests and routing them to their appropriate request handler. This class tries to operate in a manner similar to the well known (Connect)[https://www.npmjs.com/package/connect] framework for Node. The CRUD class constructor takes no arguments:
+The CRUD class is the core of the application. It handles registering interfaces and request handlers, normalising incoming requests and routing them to their appropriate request handler. This class tries to operate in a manner similar to the well known [Connect](https://www.npmjs.com/package/connect) framework for Node. The CRUD class constructor takes no arguments:
 
 ```javascript
 var Crud = new CRUD();
@@ -143,7 +143,7 @@ Crud.read(function(req, res, next, error){
 
 The library determines what type of request handler you're registering by inspecting the number of arguments which it takes, so only specify a fourth argument when you are creating an error handler. To trigger an error handler, you either `throw` inside your handler, or you call `next` with the error message as it's only argument.
 
-The `this` Object inside request handlers is defined by the interface in use. For request handlers run by the Method and Publication interfaces, the `this` object is the same as it would be inside a Meteor method or publication. For the HTTP Interface, the `this` object is what you would normally find in the `req` Object in a (Connect)[https://www.npmjs.com/package/connect] request handler.
+The `this` Object inside request handlers is defined by the interface in use. For request handlers run by the Method and Publication interfaces, the `this` object is the same as it would be inside a Meteor method or publication. For the HTTP Interface, the `this` object is what you would normally find in the `req` Object in a [Connect](https://www.npmjs.com/package/connect) request handler.
 
 ### `req`
 
