@@ -343,13 +343,13 @@ There is a slim chance that you may want to add a new interface other than HTTP,
 
 ## Transformers
 
-You may decide that you want to call res.send/res.end with objects other than cursors/arrays and simple JSON'able Objects, and handle them differently depending on the Interface. To do this, you call `setInterface` on an interface before calling `Crud.addInterface`.
+You may decide that you want to call res.send/res.end with objects other than cursors/arrays and simple JSON'able Objects, and handle them differently depending on the Interface. To do this, you call `setTransformer` on an interface before calling `Crud.addInterface`.
 
-setInterface takes a single argument. A `Function` which takes the response object, and returns the modified response object. For example, if you want to make sure that a "secret" is never delivered over the HTTP interface:
+setTransformer takes a single argument. A `Function` which takes the response object, and returns the modified response object. For example, if you want to make sure that a "secret" is never delivered over the HTTP interface:
 
 ```javascript
 var httpInterface = new CRUD.Interfaces.HTTP();
-httpInterface.setInterface(function(res){
+httpInterface.setTransformer(function(res){
   if (Array.isArray(res)) {
     res = res.map(function(doc){
       delete doc.secret;
