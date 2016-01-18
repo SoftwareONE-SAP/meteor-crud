@@ -264,7 +264,7 @@ would produce a `req.args` containing:
 
 ### `res`
 
-The res object contains two functions named "send" and "end". When you've decided what you would like to send the client in response to their request, you do the following:
+The res object contains two main functions named "send" and "end". When you've decided what you would like to send the client in response to their request, you do the following:
 
 ```javascript
 Crud.create('products', function(req, res, next){
@@ -292,6 +292,74 @@ Crud.create('products', function(req, res, next){
 The reason we have `res.send` is in case you want to specify what data to send in this handler, but you want a subsequent handler to do something else before the request ends.
 
 You can also pass a Mongo cursor to res.send or res.end. When necessary (for HTTP requests and method calls), the library will resolve the data from that cursor before passing it back to the client. For publications however, it will treat the cursor as a reactive data source.
+
+For more complicated scenarios the res object has `res.added`, `res.removed`, `res.changed`, `res.ready` and `res.onStop`. This is for when you want to respond with data from a reactive source, which can not be represented by a simple Mongo query. An example being, you want to observe how many documents are returned from a Mongo query without sending them all to the client. You *could* do this with a simple:
+
+```javascript
+Crud.read('productCount', function(req, res, next){
+  res.end({
+    count: Products.find().count(),
+  });
+});
+```
+
+The trouble is, ".count" is non reactive. The above is fine for method and http calls, but for subscriptions, the count would never update. The solution to this problem:
+
+```javascript
+Crud.read('productCount', function(req, res, next){
+  var cur    = Products.find();
+
+  var count = 0, ready = false;
+  var handle = cur.observeChanges({
+    added: function (id, doc) {
+      ++count;
+      if (ready) res.changed('count', { count: count });
+    },
+    removed: function (id) {
+      res.changed('count', { count: --count });
+    }
+  });
+  res.added('count', { count: count });
+  ready = true;
+  res.ready();
+  res.onStop(function(){
+    handle.stop();
+  });
+});
+```
+
+The above would provide an end-point which outputs a collection with a single document like this:
+
+```javascript
+[
+  {
+    "_id": "count",
+    "count": 3
+  }
+]
+```
+
+It works very similarly to an example on docs.meteor.com, except the res.added/removed/changed functions miss the first argument (the collection name) as it is taken from the CRUD end-point name. In the above example, it would be "productCount".
+
+You can fetch it via HTTP or using a Method call as usual and when you subscribe to it, the collection is actually updated reactively.
+
+Because publishing counters is such a common requirement, there is a simple helper method on the res object called "counter", meaning the above example can simply be written as:
+
+```javascript
+Crud.read('productCount', function(req, res, next){
+  var cur = Products.find();
+  res.counter(cur);
+});
+```
+
+The only difference is, for non-subscription calls, you get just the counter, rather than an array containing a single document containing a "count" field. E.g:
+
+```javascript
+Meteor.call('productCount', function(count){
+  // When using res.counter, "count" is a number rather than an array
+  // of documents like [{_id:"count","count":n}]
+});
+```
 
 ### `next`
 

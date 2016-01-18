@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 
@@ -25,13 +25,14 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 
 			try {
 				let result = handler(this, req);
-				if (typeof result === 'object' && typeof result.fetch === 'function') {
-					result = result.fetch();
+				if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
+					result.data = result.data.fetch();
 				}
 				if (this._transformer) {
-					result = this._transformer(result);
+					result.data = this._transformer(result.data);
 				}
-				return result;
+				if (result.onStop) result.onStop();
+				return result.data;
 			} catch (err) {
 				throw new Meteor.Error(interface.normalizeError(err));
 			}

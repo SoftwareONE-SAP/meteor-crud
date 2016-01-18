@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 CRUD = class CRUD {
 	/**
@@ -103,7 +103,7 @@ CRUD = class CRUD {
 		if (args.length) pass.unshift(args.pop());
 		return this.use(...pass);
 	}
-	
+
 	update (...args) {
 		let pass = [];
 		pass.push(args.pop());
@@ -124,6 +124,8 @@ CRUD = class CRUD {
 
 		let error;
 		let toSend;
+		let onStop;
+		let sendResponse = false;
 
 		let res = {
 			send: (data) => {
@@ -134,10 +136,67 @@ CRUD = class CRUD {
 			},
 			end: (data) => {
 				if (typeof data !== 'undefined') res.send(data);
-				this._done = true;
-				return done(null, toSend);
-			}
+				this._done	 = true;
+				sendResponse = true;
+			},
+			added: (id, doc) => {
+				if (typeof toSend === 'undefined') toSend = [];
+				doc._id = id;
+				toSend.push(doc);
+			},
+			ready: (opt) => {
+				if (typeof toSend === 'undefined') toSend = [];
+
+				if (opt && opt.counter && toSend.length === 1) {
+					toSend = toSend[0].count;
+				}
+
+				res.end();
+			},
+			onStop: (callback) => {
+				onStop = callback.bind(context);
+			},
+			counter: (cur) => {
+				var ready = false;
+				var count = 0;
+
+				var handle = cur.observeChanges({
+					added: () => {
+						++count;
+						if (ready) res.changed('count', { count: count });
+					},
+					removed: () => {
+						res.changed('count', { count: --count });
+					},
+				});
+				res.added('count', { count: count });
+				ready = true;
+				res.ready({ counter: true });
+
+				res.onStop(function(){
+					handle.stop();
+				});
+			},
 		};
+
+		if (['added', 'removed', 'changed', 'ready', 'onStop'].every(
+			name => context[name])) {
+
+			['added', 'removed', 'changed'].forEach(name => {
+				if (context[ name ])
+					res[ name ] = context[ name ].bind(context, req.name);
+			});
+
+			['onStop'].forEach(name => {
+				if (context[ name ])
+					res[ name ] = context[ name ].bind(context);
+			});
+
+			res.ready = function () {
+				context.ready();
+				res.end();
+			};
+		}
 
 		const run = (i=0) => {
 			if (res._done) {
@@ -158,6 +217,15 @@ CRUD = class CRUD {
 				}
 				run(i+1)
 			});
+
+			if (sendResponse) {
+				sendResponse = false;
+				done(null, {
+					data: toSend,
+					onStop: onStop,
+				});
+			}
+
 		};
 		run();
 	}
@@ -166,7 +234,7 @@ CRUD = class CRUD {
 	 * Create a unique namespace for the rpc name and call type
 	 * @param  {String} name RPC Name
 	 * @param  {String} type RPC Type
-	 * @return {String}      Namespaced name
+	 * @return {String} Namespaced name
 	 */
 	_namespace(name, type) {
 		return name.toLowerCase();

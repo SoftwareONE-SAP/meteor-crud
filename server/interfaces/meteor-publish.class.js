@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
@@ -22,10 +22,12 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 			try {
 				let result = handler(this, req);
-				if (this._transformer) {
-					result = this._transformer(result);
+				if (typeof result.data !== 'undefined' && result.data !== null) {
+					if (this._transformer) {
+						result.data = this._transformer(result.data);
+					}
 				}
-				return result;
+				return result.data;
 			} catch (err) {
 				throw new Meteor.Error(interface.normalizeError(err));
 			}

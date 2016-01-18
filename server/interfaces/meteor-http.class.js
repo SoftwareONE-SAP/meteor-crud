@@ -1,11 +1,11 @@
 /**
- * 
+ *
  */
 let qs 			= Npm.require("querystring");
 let Fiber 		= Npm.require('fibers');
 let bodyParser 	= Npm.require('body-parser');
 /**
- * 
+ *
  */
 MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
@@ -28,7 +28,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		RoutePolicy.declare(this._base_path, 'network');
 
 		/**
-		 * Inversion table to exchange CRUD for HTTP Verbs 
+		 * Inversion table to exchange CRUD for HTTP Verbs
 		 * @type {Object}
 		 */
 		this.__crud_to_verbs = {
@@ -93,9 +93,9 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 		/**
 		 * First we use the query parameters
-		 */	
+		 */
 		_.extend(options, qs.parse(req._parsedUrl.query), req.body || {});
-		
+
 		/**
 		 * Return the options
 		 */
@@ -162,19 +162,20 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 				interface,
 				type: data.type,
 				name: data.name,
-				args,		
+				args,
 			});
-			if (typeof result === 'object' && typeof result.fetch === 'function') {
-				result = result.fetch();
+			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
+				result.data = result.data.fetch();
 			}
 			if (this._transformer) {
-				result = this._transformer(result);
+				result.data = this._transformer(result.data);
 			}
-			this._dispatch(res, result, 200);
+			this._dispatch(res, result.data, 200);
+			if (result.onStop) result.onStop();
 		} catch (err) {
 			this._dispatchError(res, err, 500);
 		}
-		
+
 	}
 
 	use (name, type) {
