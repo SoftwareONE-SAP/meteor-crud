@@ -23,8 +23,8 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 			try {
 				let result = handler(this, req);
 				if (typeof result.data !== 'undefined' && result.data !== null) {
-					if (this._transformer) {
-						result.data = this._transformer(result.data);
+					if (interface._transformer) {
+						result.data = interface._transformer(result.data);
 					}
 				}
 				return result.data;

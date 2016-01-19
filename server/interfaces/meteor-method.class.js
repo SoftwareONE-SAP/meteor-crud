@@ -28,8 +28,11 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 					result.data = result.data.fetch();
 				}
-				if (this._transformer) {
-					result.data = this._transformer(result.data);
+
+				if (typeof result.data !== 'undefined' && result.data !== null) {
+					if (interface._transformer) {
+						result.data = interface._transformer(result.data);
+					}
 				}
 				if (result.onStop) result.onStop();
 				return result.data;
