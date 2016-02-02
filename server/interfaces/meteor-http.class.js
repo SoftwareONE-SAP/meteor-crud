@@ -120,6 +120,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Number} 	code Status code
 	 */
 	_dispatchError(res, err, code) {
+		console.error(err);
 		return this._dispatch(res, {
 			error: this.normalizeError(err)
 		}, code || 500);

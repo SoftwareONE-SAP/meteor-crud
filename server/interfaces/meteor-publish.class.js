@@ -29,6 +29,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 				}
 				return result.data;
 			} catch (err) {
+				console.error(err);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}
 		});

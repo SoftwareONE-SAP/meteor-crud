@@ -37,6 +37,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				if (result.onStop) result.onStop();
 				return result.data;
 			} catch (err) {
+				console.error(err);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}
 		};
