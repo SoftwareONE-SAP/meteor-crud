@@ -1,4 +1,9 @@
 /**
+ * Default max request size of 1MB
+ */
+const DEFAULT_MAX_REQUEST_SIZE = 1 * 1024 * 1024;
+
+/**
  *
  */
 let qs 			= Npm.require("querystring");
@@ -14,7 +19,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	/**
 	 * Constructor
 	 */
-	constructor(){
+	constructor(opt={}){
 		super(...arguments);
 		/**
 		 * Base path
@@ -48,12 +53,19 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			DELETE: {}
 		}
 
+		let parserOpt = {
+			limit: opt.max_request_size || DEFAULT_MAX_REQUEST_SIZE,
+		};
+
 		/**
 		 * Intercept HTTP Connections
 		 */
-		WebApp.rawConnectHandlers.use(bodyParser.raw());
-		WebApp.rawConnectHandlers.use(bodyParser.urlencoded({extended: true}));
-		WebApp.rawConnectHandlers.use(bodyParser.json());
+		WebApp.rawConnectHandlers.use(bodyParser.raw(parserOpt));
+		WebApp.rawConnectHandlers.use(bodyParser.urlencoded({
+			...parserOpt,
+			extended: true,
+		}));
+		WebApp.rawConnectHandlers.use(bodyParser.json(parserOpt));
 		WebApp.rawConnectHandlers.use((...outerArgs) => {
 			let call = _.bind(this._intercept, this);
 

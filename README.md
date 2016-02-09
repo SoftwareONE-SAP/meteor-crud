@@ -50,6 +50,16 @@ Crud.addInterface(new CRUD.Interfaces.HTTP());
 
 Once an interface has been added, your application will immediately start processing incoming requests.
 
+The "CRUD.Interfaces.HTTP" constructor takes an optional Object argument to set the maximum allowed size of a request. The default is 1MB, so if you want to change it:
+
+```javascript
+{
+  max_request_size: 10 * 1024 * 1024
+}
+```
+
+The above would change the limit to 10MB.
+
 ### use(name, type, handler)
 
 "use" is how you register a route/middleware.
