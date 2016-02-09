@@ -16,6 +16,9 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 
 		methods[ methodName ] = function (args={}) {
 			if (typeof args !== 'object') {
+				console.error(
+					`Error on ${name} [Method/${crudName}] - Invalid Args`,
+				);
 				throw new Meteor.Error("invalid_args");
 			}
 
@@ -37,7 +40,10 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				if (result.onStop) result.onStop();
 				return result.data;
 			} catch (err) {
-				console.error(err);
+				console.error(
+					`Error on ${name} [Method/${crudName}] -`,
+					interface.normalizeError(err)
+				);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}
 		};

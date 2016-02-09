@@ -132,7 +132,6 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Number} 	code Status code
 	 */
 	_dispatchError(res, err, code) {
-		console.error(err);
 		return this._dispatch(res, {
 			error: this.normalizeError(err)
 		}, code || 500);
@@ -188,6 +187,10 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			this._dispatch(res, result.data, 200);
 			if (result.onStop) result.onStop();
 		} catch (err) {
+			console.error(
+				`Error on ${data.name} [HTTP/${req.method}] -`,
+				this.normalizeError(err)
+			);
 			this._dispatchError(res, err, 500);
 		}
 

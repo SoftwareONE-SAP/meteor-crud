@@ -13,6 +13,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 		Meteor.publish(name, function (args={}) {
 			if (typeof args !== 'object') {
+				console.error(`Error on ${name} [Publication] - Invalid args`);
 				throw new Meteor.Error("invalid_args");
 			}
 
@@ -29,7 +30,10 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 				}
 				return result.data;
 			} catch (err) {
-				console.error(err);
+				console.error(
+					`Error on ${name} [Publication] -`,
+					interface.normalizeError(err)
+				);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}
 		});
