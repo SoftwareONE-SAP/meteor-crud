@@ -31,8 +31,9 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 				return result.data;
 			} catch (err) {
 				console.error(
-					`Error on ${name} [Publication] -`,
-					interface.normalizeError(err)
+					new Date(),
+					`Error on ${name} [Publication] -` + interface.normalizeError(err),
+					'Request args: ' + JSON.stringify(args)
 				);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}

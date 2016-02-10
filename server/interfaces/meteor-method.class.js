@@ -41,8 +41,10 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				return result.data;
 			} catch (err) {
 				console.error(
-					`Error on ${name} [Method/${crudName}] -`,
-					interface.normalizeError(err)
+					new Date(),
+					`Error on ${name} [Method/${crudName}] -` +
+					interface.normalizeError(err),
+					'Request args: ' + JSON.stringify(args)
 				);
 				throw new Meteor.Error(interface.normalizeError(err));
 			}

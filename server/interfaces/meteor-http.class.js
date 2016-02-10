@@ -188,8 +188,11 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			if (result.onStop) result.onStop();
 		} catch (err) {
 			console.error(
-				`Error on ${data.name} [HTTP/${req.method}] -`,
-				this.normalizeError(err)
+				new Date(),
+				`Error on ${data.name} (HTTP/${req.method}):` +
+				this.normalizeError(err),
+				'Request args: ' +
+				JSON.stringify(args)
 			);
 			this._dispatchError(res, err, 500);
 		}
