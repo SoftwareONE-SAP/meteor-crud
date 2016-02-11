@@ -27,6 +27,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 			let req = { interface, type, name, args };
 
 			try {
+				this.unblock();
 				let result = handler(this, req);
 				if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 					result.data = result.data.fetch();

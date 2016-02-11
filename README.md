@@ -169,6 +169,10 @@ The library determines what type of request handler you're registering by inspec
 
 The `this` Object inside request handlers is defined by the interface in use. For request handlers run by the Method and Publication interfaces, the `this` object is the same as it would be inside a Meteor method or publication. For the HTTP Interface, the `this` object is what you would normally find in the `req` Object in a [Connect](https://www.npmjs.com/package/connect) request handler.
 
+When running inside a Meteor method, request handlers automatically
+have this.unblock() applied so that they run asynchronously on the
+same DDP connection.
+
 ### `req`
 
 The `req` object is the same format regardless of the Interface in use. It contains four items:
