@@ -144,10 +144,12 @@ CRUD = class CRUD {
 				doc._id = id;
 				toSend.push(doc);
 			},
-			ready: (opt) => {
+			ready: (opt={}) => {
 				if (typeof toSend === 'undefined') toSend = [];
 
-				if (opt && opt.counter && toSend.length === 1) {
+				if (opt.single) toSend = toSend[0];
+
+				if (opt.counter && toSend.length === 1) {
 					toSend = toSend[0].count;
 				}
 
