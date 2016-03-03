@@ -357,7 +357,7 @@ It works very similarly to an example on docs.meteor.com, except the res.added/r
 
 You can fetch it via HTTP or using a Method call as usual and when you subscribe to it, the collection is actually updated reactively.
 
-The ready() method takes an optional argument of `{ single: true }`. If this is set, then it indicates that the data to be returned will only every contain a single document. When you subscribe to such an end-point, you get an array of that single document, as that is how PubSub works in Meteor. However, if `{ single: true }` is set, then for the Method and HTTP interfaces, the first element of the array is returned rather than the array it's self.
+The ready() method takes an optional argument of `{ single: true }`. If this is set, then it indicates that the data to be returned will only every contain a single document. When you subscribe to such an end-point, you get an array of that single document, as that is how PubSub works in Meteor. However, if `{ single: true }` is set, then for the Method and HTTP interfaces, the first element of the array is returned rather than the array itself.
 
 Because publishing counters is such a common requirement, there is a simple helper method on the res object called "counter", meaning the above example can simply be written as:
 
