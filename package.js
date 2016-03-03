@@ -1,7 +1,7 @@
 Package.describe({
   name: 'centiq:crud',
-  version: '1.0.0',
-  summary: 'Apply crud operations accross meteor methods publciations and http.'
+  version: '1.0.1',
+  summary: 'Apply crud operations across meteor methods publications and http.'
 });
 
 Npm.depends({

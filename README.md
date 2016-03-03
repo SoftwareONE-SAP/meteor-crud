@@ -459,3 +459,7 @@ function astronomyTransformer (res) {
   return res;
 }
 ```
+
+## License - MIT
+
+Please see LICENSE file for more details.
