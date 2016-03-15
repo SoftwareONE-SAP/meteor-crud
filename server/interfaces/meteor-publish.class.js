@@ -27,6 +27,21 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 					if (interface._transformer) {
 						result.data = interface._transformer(result.data);
 					}
+					/**
+					 * If a non-reactive array was returned, we need to call added
+					 * for each element and then ready. Try and intelligently pick
+					 * _id's for the documents
+					 */
+					if (Array.isArray(result.data)) {
+						let last_id = 1, usedIds = {};
+						result.data.forEach(doc => {
+							let id = doc._id || doc.id || last_id;
+							while (usedIds[ EJSON.stringify(id) ]) { id = ++last_id }
+							usedIds[ EJSON.stringify(id) ] = true;
+							this.added(name, id, doc);
+						});
+						return this.ready();
+					}
 				}
 				return result.data;
 			} catch (err) {
