@@ -39,7 +39,6 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 					}
 				}
 				if (result.onStop) result.onStop();
-
 				if (result.type === 'application/json') {
 					return result.data;
 				} else {
@@ -48,6 +47,8 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 						data: result.data,
 					};
 					if (result.filename) ret.filename = result.filename;
+					if (result.content_encoding) ret.encoding = result.content_encoding;
+					if (result.disposition) ret.disposition = result.disposition;
 					return ret;
 				}
 			} catch (err) {

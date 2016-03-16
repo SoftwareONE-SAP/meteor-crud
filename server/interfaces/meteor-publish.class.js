@@ -32,6 +32,8 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 							data: result.data,
 						};
 						if (result.filename) doc.filename = result.filename;
+						if (result.disposition) doc.disposition = result.disposition;
+						if (result.content_encoding) doc.encoding = result.content_encoding;
 						this.added(name, "FILE", doc);
 						return this.ready();
 					}

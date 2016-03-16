@@ -122,20 +122,23 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Number} code Status code
 	 */
 	_dispatch(res, data, code, opt={}) {
-		const content_type = opt.content_type || 'application/json';
+		let content_type = opt.content_type || 'application/json';
 
 		if (opt.filename) {
-			res.setHeader('Content-Disposition', contentDisposition(opt.filename));
+			const type = opt.disposition || 'attachment';
+			res.setHeader('Content-Disposition', contentDisposition(opt.filename, { type }));
 		}
 
 		if (content_type === 'application/json') {
 			data = JSON.stringify(data);
-		} else {
-			res.setHeader('Content-Length', data.length);
+		} else if (opt.content_encoding) {
+			content_type += '; charset=' + opt.content_encoding;
 		}
 
-		res.writeHead(code || 200, {"Content-Type": content_type});
-		res.end(data);
+		res.setHeader('Content-Length', data.length);
+		res.setHeader('Content-Type', content_type);
+		res.writeHead(code || 200);
+		res.end(new Buffer(data));
 	}
 
 	/**
@@ -202,7 +205,9 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 			let opt = {
 				filename:     result.filename,
+				disposition:	result.disposition,
 				content_type: result.content_type,
+				content_encoding: result.content_encoding,
 			};
 
 			this._dispatch(res, result.data, 200, opt);

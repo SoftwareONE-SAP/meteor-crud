@@ -127,16 +127,29 @@ CRUD = class CRUD {
 		let onStop;
 		let sendResponse = false;
 
-		let filename;
+		let filename, disposition;
 		let content_type = 'application/json';
+		let content_encoding;
 
 		let res = {
 			sendBinary: (data, opt={}) => {
+
+				if (typeof data === 'string') {
+					opt.encoding = opt.encoding || 'utf-8';
+					data = new Buffer(data);
+				} else if (Array.isArray(data)) {
+					data = new Buffer(data);
+				} else if (!(data instanceof Buffer)) {
+					throw "sendBinary requires a Buffer, Array or String";
+				}
+
 				res.send(data);
 				this._done	 = true;
 				sendResponse = true;
 				if (opt.filename) filename = opt.filename;
-				if (opt.type)     content_type = opt.type;
+				if (opt.disposition) disposition = opt.disposition;
+				if (opt.encoding) content_encoding = opt.encoding;
+				content_type = opt.type || 'application/octet-stream';
 			},
 			send: (data) => {
 				if (typeof toSend !== 'undefined') {
@@ -236,7 +249,9 @@ CRUD = class CRUD {
 					data: toSend,
 					onStop,
 					filename,
+					disposition,
 					content_type,
+					content_encoding,
 				});
 			}
 

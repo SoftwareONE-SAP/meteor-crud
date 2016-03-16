@@ -312,13 +312,15 @@ If you want to pass non-JSON data, for example you want to support file download
 ```javascript
 Crud.read('hello', function(req, res, next){
   res.sendBinary('<strong>Hello World</strong>', {
-    type:     'text/html',
-    filename: 'helloworld.html',
+    type:        'text/html',
+    encoding:    'utf-8',
+    disposition: 'inline',
+    filename:    'helloworld.html',
   });
 });
 ```
 
-The raw content to send is the first argument. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces.
+The raw content to send is the first argument. It can be a Buffer or an Array or a String. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `encoding` is optional, and describes the content encoding of the data if there is one. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces. Set `disposition` to "inline" if you want your Content-Disposition header to be different to "attachment".
 
 For more complicated scenarios the res object has `res.added`, `res.removed`, `res.changed`, `res.ready` and `res.onStop`. This is for when you want to respond with data from a reactive source, which can not be represented by a simple Mongo query. An example being, you want to observe how many documents are returned from a Mongo query without sending them all to the client. You *could* do this with a simple:
 
