@@ -24,6 +24,18 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 			try {
 				let result = handler(this, req);
 				if (typeof result.data !== 'undefined' && result.data !== null) {
+
+					// Non JSON content
+					if (result.content_type !== 'application/json') {
+						let doc = {
+							type: result.content_type,
+							data: result.data,
+						};
+						if (result.filename) doc.filename = result.filename;
+						this.added(name, "FILE", doc);
+						return this.ready();
+					}
+
 					if (interface._transformer) {
 						result.data = interface._transformer(result.data);
 					}

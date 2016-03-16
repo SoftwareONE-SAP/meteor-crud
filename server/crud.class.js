@@ -127,7 +127,17 @@ CRUD = class CRUD {
 		let onStop;
 		let sendResponse = false;
 
+		let filename;
+		let content_type = 'application/json';
+
 		let res = {
+			sendBinary: (data, opt={}) => {
+				res.send(data);
+				this._done	 = true;
+				sendResponse = true;
+				if (opt.filename) filename = opt.filename;
+				if (opt.type)     content_type = opt.type;
+			},
 			send: (data) => {
 				if (typeof toSend !== 'undefined') {
 					throw "Already specified data to send";
@@ -224,7 +234,9 @@ CRUD = class CRUD {
 				sendResponse = false;
 				done(null, {
 					data: toSend,
-					onStop: onStop,
+					onStop,
+					filename,
+					content_type,
 				});
 			}
 

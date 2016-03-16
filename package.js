@@ -1,13 +1,14 @@
 Package.describe({
   name: 'centiq:crud',
-  version: '1.0.3',
+  version: '1.0.4',
   summary: 'Apply crud operations across meteor methods publications and http.',
   git: 'https://github.com/Centiq/meteor-crud',
   documentation: 'README.md'
 });
 
 Npm.depends({
-  'body-parser': '1.14.1'
+  'body-parser': '1.14.1',
+  'content-disposition': '0.5.1',
 })
 
 Package.onUse(function(api) {

@@ -39,7 +39,17 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 					}
 				}
 				if (result.onStop) result.onStop();
-				return result.data;
+
+				if (result.type === 'application/json') {
+					return result.data;
+				} else {
+					let ret = {
+						type: result.content_type,
+						data: result.data,
+					};
+					if (result.filename) ret.filename = result.filename;
+					return ret;
+				}
 			} catch (err) {
 				console.error(
 					new Date(),

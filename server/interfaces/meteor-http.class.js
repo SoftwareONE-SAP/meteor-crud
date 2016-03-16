@@ -9,6 +9,7 @@ const DEFAULT_MAX_REQUEST_SIZE = 1 * 1024 * 1024;
 let qs 			= Npm.require("querystring");
 let Fiber 		= Npm.require('fibers');
 let bodyParser 	= Npm.require('body-parser');
+let contentDisposition = Npm.require('content-disposition');
 /**
  *
  */
@@ -120,9 +121,21 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Object} data Object to dispatch
 	 * @param  {Number} code Status code
 	 */
-	_dispatch(res, data, code) {
-		res.writeHead(code || 200, {"Content-Type": "application/json"});
-		res.end(JSON.stringify(data));
+	_dispatch(res, data, code, opt={}) {
+		const content_type = opt.content_type || 'application/json';
+
+		if (opt.filename) {
+			res.setHeader('Content-Disposition', contentDisposition(opt.filename));
+		}
+
+		if (content_type === 'application/json') {
+			data = JSON.stringify(data);
+		} else {
+			res.setHeader('Content-Length', data.length);
+		}
+
+		res.writeHead(code || 200, {"Content-Type": content_type});
+		res.end(data);
 	}
 
 	/**
@@ -169,6 +182,8 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		const args    = this._unmarshal(req);
 		const handler = Meteor.wrapAsync(crud.handle.bind(crud));
 
+
+
 		try {
 			let result = handler(req, {
 				interface,
@@ -184,7 +199,13 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 					result.data = interface._transformer(result.data);
 				}
 			}
-			this._dispatch(res, result.data, 200);
+
+			let opt = {
+				filename:     result.filename,
+				content_type: result.content_type,
+			};
+
+			this._dispatch(res, result.data, 200, opt);
 			if (result.onStop) result.onStop();
 		} catch (err) {
 			console.error(

@@ -307,6 +307,19 @@ The reason we have `res.send` is in case you want to specify what data to send i
 
 You can also pass a Mongo cursor to res.send or res.end. When necessary (for HTTP requests and method calls), the library will resolve the data from that cursor before passing it back to the client. For publications however, it will treat the cursor as a reactive data source.
 
+If you want to pass non-JSON data, for example you want to support file downloads, you can use `res.sendBinary`:
+
+```javascript
+Crud.read('hello', function(req, res, next){
+  res.sendBinary('<strong>Hello World</strong>', {
+    type:     'text/html',
+    filename: 'helloworld.html',
+  });
+});
+```
+
+The raw content to send is the first argument. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces.
+
 For more complicated scenarios the res object has `res.added`, `res.removed`, `res.changed`, `res.ready` and `res.onStop`. This is for when you want to respond with data from a reactive source, which can not be represented by a simple Mongo query. An example being, you want to observe how many documents are returned from a Mongo query without sending them all to the client. You *could* do this with a simple:
 
 ```javascript
