@@ -135,10 +135,11 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			content_type += '; charset=' + opt.content_encoding;
 		}
 
+		data = new Buffer(data);
 		res.setHeader('Content-Length', data.length);
 		res.setHeader('Content-Type', content_type);
 		res.writeHead(code || 200);
-		res.end(new Buffer(data));
+		res.end(data);
 	}
 
 	/**
@@ -194,6 +195,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 				name: data.name,
 				args,
 			});
+
 			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 				result.data = result.data.fetch();
 			}

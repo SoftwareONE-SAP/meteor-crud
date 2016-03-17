@@ -44,7 +44,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				} else {
 					let ret = {
 						type: result.content_type,
-						data: result.data,
+						data: new Buffer(result.data).toJSON(),
 					};
 					if (result.filename) ret.filename = result.filename;
 					if (result.content_encoding) ret.encoding = result.content_encoding;

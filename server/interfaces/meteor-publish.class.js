@@ -29,7 +29,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 					if (result.content_type !== 'application/json') {
 						let doc = {
 							type: result.content_type,
-							data: result.data,
+							data: new Buffer(result.data).toJSON(),
 						};
 						if (result.filename) doc.filename = result.filename;
 						if (result.disposition) doc.disposition = result.disposition;

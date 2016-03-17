@@ -1,6 +1,6 @@
 Package.describe({
   name: 'centiq:crud',
-  version: '1.0.6',
+  version: '1.0.7',
   summary: 'Apply crud operations across meteor methods publications and http.',
   git: 'https://github.com/Centiq/meteor-crud',
   documentation: 'README.md'

@@ -175,7 +175,6 @@ CRUD = class CRUD {
 				if (opt.counter && toSend.length === 1) {
 					toSend = toSend[0].count;
 				}
-
 				res.end();
 			},
 			onStop: (callback) => {
