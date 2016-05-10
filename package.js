@@ -9,6 +9,7 @@ Package.describe({
 Npm.depends({
   'body-parser': '1.14.1',
   'content-disposition': '0.5.1',
+  'multiparty': '4.1.2',
 })
 
 Package.onUse(function(api) {

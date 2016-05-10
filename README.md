@@ -276,6 +276,23 @@ would produce a `req.args` containing:
 { "foo": "123", "bar": { "x": "234" } }
 ```
 
+It also supports "multipart/form-data" requests. If you do a file upload against the HTTP interface, then the file data is stored in `req.files` and is of the following form:
+
+```json
+{
+  "field name": [
+    {
+      "path": "/tmp/QdMSwtltXQy8V3wpxh7dbVxn.jpg",
+      "size": 17012,
+      "name": "unnamed.jpg",
+      "type": "image/jpeg"
+    }
+  ]
+}
+```
+
+Temporary files are removed at the end of the request, so if you intend to do anything with them after the request has completed, make sure you at least have a filehandle open. Also, be aware that file uploads are restricted in size based on the "max_request_size" option, so you may need to modify that value.
+
 ### `res`
 
 The res object contains two main functions named "send" and "end". When you've decided what you would like to send the client in response to their request, you do the following:

@@ -3,16 +3,13 @@
  */
 const DEFAULT_MAX_REQUEST_SIZE = 1 * 1024 * 1024;
 
-/**
- *
- */
-let qs 			= Npm.require("querystring");
-let Fiber 		= Npm.require('fibers');
-let bodyParser 	= Npm.require('body-parser');
-let contentDisposition = Npm.require('content-disposition');
-/**
- *
- */
+const qs                 = Npm.require('querystring');
+const fs                 = Npm.require('fs');
+const Fiber              = Npm.require('fibers');
+const bodyParser         = Npm.require('body-parser');
+const multiparty         = Npm.require('multiparty');
+const contentDisposition = Npm.require('content-disposition');
+
 MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 	name () { return 'HTTP' }
@@ -22,6 +19,9 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 */
 	constructor(opt={}){
 		super(...arguments);
+
+		this._max_request_size = opt.max_request_size || DEFAULT_MAX_REQUEST_SIZE;
+
 		/**
 		 * Base path
 		 * @type {String}
@@ -55,7 +55,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		}
 
 		let parserOpt = {
-			limit: opt.max_request_size || DEFAULT_MAX_REQUEST_SIZE,
+			limit: this._max_request_size,
 		};
 
 		/**
@@ -182,11 +182,22 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 		 * @type {Function}
 		 */
 		const data = this._handlers[req.method][req._parsedUrl.pathname]
-
-		const args    = this._unmarshal(req);
+		let args = this._unmarshal(req);
 		const handler = Meteor.wrapAsync(crud.handle.bind(crud));
 
-
+		/**
+		 * multipart/form-data parsing
+		 */
+		let files = null;
+		try {
+			const res = this.multipart(req);
+			if (res) {
+				files = res.files;
+				args = { ...args, ...res.fields };
+			}
+		} catch (err) {
+			return next(err.message);
+		}
 
 		try {
 			let result = handler(req, {
@@ -194,7 +205,17 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 				type: data.type,
 				name: data.name,
 				args,
+				files,
 			});
+
+			/**
+			 * Clean up files from multipart/form-data POSTs
+			 */
+			if (files) {
+				Object.keys(files).forEach(field => {
+					files[ field ].forEach(file => fs.unlink(file.path));
+				});
+			}
 
 			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 				result.data = result.data.fetch();
@@ -225,6 +246,48 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			this._dispatchError(res, err, 500);
 		}
 
+	}
+
+	/**
+	 * If this is a multipart/form-data request, then parses it
+	 * and returns parsed fields and file data, otherwise returns
+	 * undefined
+	 */
+	multipart (req) {
+		const type = req.headers['content-type']||'';
+
+		if (!type.match(/^multipart\/form-data(?:\s*;.*)?$/i)) {
+			return;
+		}
+
+		return Meteor.wrapAsync(callback => {
+			const form = new multiparty.Form({
+				maxFieldsSize: this._max_request_size,
+				maxFilesSize:  this._max_request_size,
+			});
+			form.parse(req, (err, fields, files) => {
+				if (err) return callback(err);
+				Object.keys(files||{}).forEach(field => {
+					files[field] = files[ field ].map(file => {
+						file.name = file.originalFilename;
+						delete file.originalFilename;
+						delete file.fieldName;
+						file.type = file.headers['content-type'] || 'application/octet-stream';
+						delete file.headers;
+						return file;
+					}).filter(file => {
+						const keep = file.name || file.size
+						if (!keep) fs.unlink(file.path);
+						return keep;
+					});
+					if (files[field].length === 0) delete files[field];
+				});
+				callback(err, {
+					fields: fields || {},
+					files:  files  || {},
+				});
+			});
+		})();
 	}
 
 	use (name, type) {
