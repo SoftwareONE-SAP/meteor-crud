@@ -29,22 +29,22 @@ CRUD = class CRUD {
 	 * Add an interface to the CRUD router
 	 * @param {[type]} interface [description]
 	 */
-	addInterface(interface) {
+	addInterface(iface) {
 		/**
 		 * @todo Validate interface correctly
 		 */
-		if(interface in this._interfaces)
+		if(iface in this._interfaces)
 			throw new Meteor.Error("CRUD", 'Interface already added');
 
 		/**
 		 * Give the interface some context
 		 */
-		interface.setContext(this);
+		iface.setContext(this);
 
 		/**
 		 * Add the itnerface to the interface lists
 		 */
-		this._interfaces.push(interface);
+		this._interfaces.push(iface);
 	}
 
 	/**
@@ -79,9 +79,9 @@ CRUD = class CRUD {
 		let error = handler.length === 4;
 
 		this._routes.push({ name, type, handler, error });
-		this._interfaces.forEach(interface => {
+		this._interfaces.forEach(iface => {
 			try {
-				interface.use(name, type);
+				iface.use(name, type);
 			} catch (err) {
 				// @todo - Die here
 			}
