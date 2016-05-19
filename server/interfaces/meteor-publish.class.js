@@ -6,8 +6,8 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 	name () { return 'Publish' }
 
 	use (name, type) {
-		const interface = this;
-		const crud = interface.getContext();
+		const iface = this;
+		const crud = iface.getContext();
 
 		if(type !== CRUD.TYPE_READ) return;
 
@@ -19,7 +19,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 			const handler = Meteor.wrapAsync(crud.handle.bind(crud));
 
-			let req = { interface, type, name, args };
+			let req = { interface: iface, type, name, args };
 
 			try {
 				let result = handler(this, req);
@@ -38,8 +38,8 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 						return this.ready();
 					}
 
-					if (interface._transformer) {
-						result.data = interface._transformer(result.data);
+					if (iface._transformer) {
+						result.data = iface._transformer(result.data);
 					}
 					/**
 					 * If a non-reactive array was returned, we need to call added
@@ -61,10 +61,10 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 			} catch (err) {
 				console.error(
 					new Date(),
-					`Error on ${name} [Publication] -` + interface.normalizeError(err),
+					`Error on ${name} [Publication] -` + iface.normalizeError(err),
 					'Request args: ' + JSON.stringify(args)
 				);
-				throw new Meteor.Error(interface.normalizeError(err));
+				throw new Meteor.Error(iface.normalizeError(err));
 			}
 		});
 	}

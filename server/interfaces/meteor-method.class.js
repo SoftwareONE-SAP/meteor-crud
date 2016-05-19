@@ -6,8 +6,8 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 	name () { return 'Method' }
 
 	use (name, type) {
-		const interface = this;
-		const crud = interface.getContext();
+		const iface = this;
+		const crud = iface.getContext();
 
 		const crudName   = CRUD.TYPES[type];
 		const methodName = crudName === 'read' ? name : name + '.' + crudName;
@@ -24,7 +24,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 
 			const handler = Meteor.wrapAsync(crud.handle.bind(crud));
 
-			let req = { interface, type, name, args };
+			let req = { interface: iface, type, name, args };
 
 			try {
 				this.unblock();
@@ -34,8 +34,8 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				}
 
 				if (typeof result.data !== 'undefined' && result.data !== null) {
-					if (interface._transformer) {
-						result.data = interface._transformer(result.data);
+					if (iface._transformer) {
+						result.data = iface._transformer(result.data);
 					}
 				}
 				if (result.onStop) result.onStop();
@@ -55,10 +55,10 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				console.error(
 					new Date(),
 					`Error on ${name} [Method/${crudName}] -` +
-					interface.normalizeError(err),
+					iface.normalizeError(err),
 					'Request args: ' + JSON.stringify(args)
 				);
-				throw new Meteor.Error(interface.normalizeError(err));
+				throw new Meteor.Error(iface.normalizeError(err));
 			}
 		};
 

@@ -161,8 +161,8 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Function}   next [description]
 	 */
 	_intercept(req, res, next) {
-		const interface = this;
-		const crud = interface.getContext();
+		const iface = this;
+		const crud = iface.getContext();
 
 		/**
 		 * dirty check to exclude none crud operations
@@ -201,7 +201,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 		try {
 			let result = handler(req, {
-				interface,
+				interface: iface,
 				type: data.type,
 				name: data.name,
 				args,
@@ -221,8 +221,8 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 				result.data = result.data.fetch();
 			}
 			if (typeof result.data !== 'undefined' && result.data !== null) {
-				if (interface._transformer) {
-					result.data = interface._transformer(result.data);
+				if (iface._transformer) {
+					result.data = iface._transformer(result.data);
 				}
 			}
 
@@ -291,8 +291,8 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	}
 
 	use (name, type) {
-		const interface = this;
-		const crud = interface.getContext();
+		const iface = this;
+		const crud = iface.getContext();
 
 		/**
 		 * Convert the type to a verb
