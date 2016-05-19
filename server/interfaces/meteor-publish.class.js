@@ -19,7 +19,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 			const handler = Meteor.wrapAsync(crud.handle.bind(crud));
 
-			let req = { iface, type, name, args };
+			let req = { interface: iface, type, name, args };
 
 			try {
 				let result = handler(this, req);

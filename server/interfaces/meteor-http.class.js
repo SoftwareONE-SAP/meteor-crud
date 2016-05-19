@@ -201,7 +201,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 		try {
 			let result = handler(req, {
-				iface,
+				interface: iface,
 				type: data.type,
 				name: data.name,
 				args,
