@@ -58,6 +58,7 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 					iface.normalizeError(err),
 					'Request args: ' + JSON.stringify(args)
 				);
+				if (err instanceof Meteor.Error) throw err;
 				throw new Meteor.Error(iface.normalizeError(err));
 			}
 		};

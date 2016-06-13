@@ -64,6 +64,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 					`Error on ${name} [Publication] -` + iface.normalizeError(err),
 					'Request args: ' + JSON.stringify(args)
 				);
+				if (err instanceof Meteor.Error) throw err;
 				throw new Meteor.Error(iface.normalizeError(err));
 			}
 		});
