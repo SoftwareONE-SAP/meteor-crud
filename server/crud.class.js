@@ -279,6 +279,7 @@ CRUD = class CRUD {
  * Export the default interfaces
  * @type {Object}
  */
+CRUD.BaseInterface = BaseInterface;
 CRUD.Interfaces = {
 	Method: MeteorMethodInterface,
 	Publication: MeteorPublishInterface,
