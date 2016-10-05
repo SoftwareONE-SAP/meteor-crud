@@ -60,6 +60,12 @@ The "CRUD.Interfaces.HTTP" constructor takes an optional Object argument to set 
 
 The above would change the limit to 10MB.
 
+### getInterfaces()
+
+Returns a list of the interfaces which you added using `addInterface`. This may
+be useful if you want to add additional transformers or make other such changes
+to a registered interface.
+
 ### use(name, type, handler)
 
 "use" is how you register a route/middleware.

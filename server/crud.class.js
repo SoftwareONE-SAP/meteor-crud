@@ -48,6 +48,13 @@ CRUD = class CRUD {
 	}
 
 	/**
+	 * Returns a list of the currently registered interfaces.
+	 */
+	getInterfaces() {
+		return [ ...this._interfaces ];
+	}
+
+	/**
 	 * Register a route.
 	 * @param {[string]}   name    Optional name to match against
 	 * @param {[number]}   type    Optional crud type
