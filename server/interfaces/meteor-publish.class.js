@@ -38,8 +38,10 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 						return this.ready();
 					}
 
-					if (iface._transformer) {
-						result.data = iface._transformer(result.data);
+					if (iface._transformers) {
+						iface._transformers.forEach(transformer => {
+							result.data = transformer.call(iface, result.data);
+						});
 					}
 					/**
 					 * If a non-reactive array was returned, we need to call added

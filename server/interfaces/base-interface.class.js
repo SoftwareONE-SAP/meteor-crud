@@ -14,7 +14,14 @@ BaseInterface = class BaseInterface {
 	}
 
 	setTransformer(transformer) {
-		this._transformer = transformer;
+		this._transformers = [transformer];
+	}
+
+	addTransformer(transformer) {
+		if (!this._transformers) {
+			this._transformers = [];
+		}
+		this._transformers.push(transformer);
 	}
 
 	/**

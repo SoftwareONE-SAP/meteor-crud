@@ -34,8 +34,10 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				}
 
 				if (typeof result.data !== 'undefined' && result.data !== null) {
-					if (iface._transformer) {
-						result.data = iface._transformer(result.data);
+					if (iface._transformers) {
+						iface._transformers.forEach(transformer => {
+							result.data = transformer.call(iface, result.data);
+						});
 					}
 				}
 				if (result.onStop) result.onStop();

@@ -492,6 +492,8 @@ function astronomyTransformer (res) {
 }
 ```
 
+If you want multiple transformers, you can call `addTransformer` instead of `setTransformer`. The transformers will be run in the order they are added. A call to `setTransformer` overwrites any previously set or added transformers.
+
 ## License - MIT
 
 Please see LICENSE file for more details.
