@@ -1,6 +1,6 @@
 Package.describe({
   name: 'centiq:crud',
-  version: '1.0.13',
+  version: '1.0.14',
   summary: 'Apply crud operations across meteor methods publications and http.',
   git: 'https://github.com/Centiq/meteor-crud',
   documentation: 'README.md'
@@ -20,6 +20,7 @@ Package.onUse(function(api) {
   api.use('routepolicy');
   api.use('webapp');
   api.use('check');
+  api.use('meteorhacks:unblock');
 
   api.addFiles('server/interfaces/base-interface.class.js', 'server');
   api.addFiles('server/interfaces/meteor-method.class.js',  'server');

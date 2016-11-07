@@ -22,6 +22,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 			let req = { interface: iface, type, name, args };
 
 			try {
+				this.unblock();
 				let result = handler(this, req);
 				if (typeof result.data !== 'undefined' && result.data !== null) {
 
