@@ -121,7 +121,8 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 	 * @param  {Object} data Object to dispatch
 	 * @param  {Number} code Status code
 	 */
-	_dispatch(res, data, code, opt={}) {
+	_dispatch(res, data, code=200, opt={}) {
+
 		let content_type = opt.content_type || 'application/json';
 
 		if (opt.filename) {
@@ -129,17 +130,29 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			res.setHeader('Content-Disposition', contentDisposition(opt.filename, { type }));
 		}
 
-		if (content_type === 'application/json') {
-			data = JSON.stringify(data);
-		} else if (opt.content_encoding) {
-			content_type += '; charset=' + opt.content_encoding;
+		if (opt.redirect) {
+
+			res.setHeader('Location', data);
+			res.writeHead(code);
+			res.end();
+
+		} else {
+
+			data = new Buffer(data);
+
+			if (content_type === 'application/json') {
+				data = JSON.stringify(data);
+			} else if (opt.content_encoding) {
+				content_type += '; charset=' + opt.content_encoding;
+			}
+
+			res.setHeader('Content-Length', data.length);
+			res.setHeader('Content-Type', content_type);
+			res.writeHead(code);
+			res.end(data);
+
 		}
 
-		data = new Buffer(data);
-		res.setHeader('Content-Length', data.length);
-		res.setHeader('Content-Type', content_type);
-		res.writeHead(code || 200);
-		res.end(data);
 	}
 
 	/**
@@ -217,6 +230,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 				});
 			}
 
+
 			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 				result.data = result.data.fetch();
 			}
@@ -229,13 +243,22 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			}
 
 			let opt = {
-				filename:     result.filename,
-				disposition:	result.disposition,
-				content_type: result.content_type,
+				filename:         result.filename,
+				disposition:	  result.disposition,
+				content_type:     result.content_type,
 				content_encoding: result.content_encoding,
+			        redirect:         result.redirect,
 			};
 
-			this._dispatch(res, result.data, 200, opt);
+
+
+			if (result.redirect) {
+				this._dispatch(res, result.data.url, result.data.code, opt);
+			} else {
+				this._dispatch(res, result.data, 200, opt);
+			}
+
+
 			if (result.onStop) result.onStop();
 		} catch (err) {
 			console.error(

@@ -133,12 +133,24 @@ CRUD = class CRUD {
 		let toSend;
 		let onStop;
 		let sendResponse = false;
+		let redirect = false;
 
 		let filename, disposition;
 		let content_type = 'application/json';
 		let content_encoding;
 
 		let res = {
+			redirect: (url, code=301) => {
+
+			        res.send({
+				        url,
+				        code,
+			        });
+
+				redirect = true;
+				sendResponse = true;
+
+			},
 			sendBinary: (data, opt={}) => {
 
 				if (typeof data === 'string') {
@@ -253,6 +265,7 @@ CRUD = class CRUD {
 				sendResponse = false;
 				done(null, {
 					data: toSend,
+					redirect,
 					onStop,
 					filename,
 					disposition,

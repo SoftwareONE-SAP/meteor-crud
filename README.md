@@ -345,6 +345,17 @@ Crud.read('hello', function(req, res, next){
 
 The raw content to send is the first argument. It can be a Buffer or an Array or a String. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `encoding` is optional, and describes the content encoding of the data if there is one. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces. Set `disposition` to "inline" if you want your Content-Disposition header to be different to "attachment".
 
+If you want to redirect the user or return data which has the URL and the status code of the redirect you can use `res.redirect`,
+this function accepts two arguments `url` which is required & `status code` which is optional and by default it is 301.
+
+```javascript
+Crud.read('hello', function(req, res, next) {
+
+  res.redirect('http://example.com', 302);
+
+})
+```
+
 For more complicated scenarios the res object has `res.added`, `res.removed`, `res.changed`, `res.ready` and `res.onStop`. This is for when you want to respond with data from a reactive source, which can not be represented by a simple Mongo query. An example being, you want to observe how many documents are returned from a Mongo query without sending them all to the client. You *could* do this with a simple:
 
 ```javascript

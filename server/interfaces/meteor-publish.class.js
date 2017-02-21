@@ -12,6 +12,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 		if(type !== CRUD.TYPE_READ) return;
 
 		Meteor.publish(name, function (args={}) {
+
 			if (typeof args !== 'object') {
 				console.error(`Error on ${name} [Publication] - Invalid args`);
 				throw new Meteor.Error("invalid_args");
@@ -23,15 +24,19 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 			try {
 				this.unblock();
+
 				let result = handler(this, req);
+
 				if (typeof result.data !== 'undefined' && result.data !== null) {
 
 					// Non JSON content
 					if (result.content_type !== 'application/json') {
+
 						let doc = {
 							type: result.content_type,
 							data: new Buffer(result.data).toJSON(),
 						};
+
 						if (result.filename) doc.filename = result.filename;
 						if (result.disposition) doc.disposition = result.disposition;
 						if (result.content_encoding) doc.encoding = result.content_encoding;
@@ -39,11 +44,31 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 						return this.ready();
 					}
 
+					/**
+					 * If a user subscribes multiple times using different arguments
+					 * this will insure that the documents sent back to the client
+					 * will have a different id.
+          				 */
+					if (result.redirect) {
+
+						result.data._id = `${result.data.code}\0${result.data.url}`
+
+					}
+
+					/**
+					 * If we're returning a single object then
+					 * wrap it in an array.
+					 */
+					if (!Array.isArray(result.data)) {
+					        result.data = [result.data];
+					}
+
 					if (iface._transformers) {
 						iface._transformers.forEach(transformer => {
 							result.data = transformer.call(iface, result.data);
 						});
 					}
+
 					/**
 					 * If a non-reactive array was returned, we need to call added
 					 * for each element and then ready. Try and intelligently pick
@@ -60,6 +85,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 						return this.ready();
 					}
 				}
+
 				return result.data;
 			} catch (err) {
 				console.error(
