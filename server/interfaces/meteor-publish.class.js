@@ -58,9 +58,7 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 						 * we return a single object and its not a cursor so we wrap
 						 * it in an array so we can return the data.
 						 */
-						if (!Array.isArray(result.data)) {
-							result.data = [result.data];
-						}
+						result.data = [result.data];
 
 					}
 
