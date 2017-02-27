@@ -53,14 +53,15 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 						result.data._id = `${result.data.code}\0${result.data.url}`
 
-					}
+						/**
+						 * In a redirect,
+						 * we return a single object and its not a cursor so we wrap
+						 * it in an array so we can return the data.
+						 */
+						if (!Array.isArray(result.data)) {
+							result.data = [result.data];
+						}
 
-					/**
-					 * If we're returning a single object then
-					 * wrap it in an array.
-					 */
-					if (!Array.isArray(result.data)) {
-					        result.data = [result.data];
 					}
 
 					if (iface._transformers) {
