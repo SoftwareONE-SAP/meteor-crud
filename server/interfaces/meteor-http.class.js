@@ -138,14 +138,13 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 
 		} else {
 
-			data = new Buffer(data);
-
 			if (content_type === 'application/json') {
 				data = JSON.stringify(data);
 			} else if (opt.content_encoding) {
 				content_type += '; charset=' + opt.content_encoding;
 			}
 
+			data = new Buffer(data);
 			res.setHeader('Content-Length', data.length);
 			res.setHeader('Content-Type', content_type);
 			res.writeHead(code);
