@@ -241,7 +241,7 @@ CRUD = class CRUD {
 			};
 		}
 
-		const run = (i=0) => {
+		const run = async (i=0) => {
 			if (res._done) {
 				throw "Can not call next after finishing response";
 			}
@@ -254,12 +254,16 @@ CRUD = class CRUD {
 			if (route.name && route.name !== req.name) return run(i+1);
 			if (route.type && route.type !== req.type) return run(i+1);
 			if (route.error !== !!error) return run(i+1);
-			route.handler.call(context, req, res, err => {
-				if (typeof err !== 'undefined') {
-					error = err;
-				}
-				run(i+1)
-			});
+			try {
+				await route.handler.call(context, req, res, err => {
+					if (typeof err !== 'undefined') {
+						error = err; // next(err). Record error, but continue to next route
+					}
+					return run(i+1);
+				});
+			} catch(err) {
+				return done(err); // throw err. Break out with the error.
+			}
 
 			if (sendResponse) {
 				sendResponse = false;
