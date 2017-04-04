@@ -1,6 +1,6 @@
 Package.describe({
   name: 'centiq:crud',
-  version: '1.1.2',
+  version: '1.1.3',
   summary: 'Apply crud operations across meteor methods publications and http.',
   git: 'https://github.com/Centiq/meteor-crud',
   documentation: 'README.md'
@@ -13,7 +13,7 @@ Npm.depends({
 })
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.2.0.2');
+  api.versionsFrom('1.3');
   api.use('ecmascript');
   api.use('ejson');
   api.use('underscore');
