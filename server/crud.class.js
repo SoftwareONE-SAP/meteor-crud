@@ -170,6 +170,13 @@ CRUD = class CRUD {
 				if (opt.encoding) content_encoding = opt.encoding;
 				content_type = opt.type || 'application/octet-stream';
 			},
+			sendStream: (data, opt={}) => {
+				if (typeof data.pipe !== 'function') throw new Error('`data` is not streamable, missing `pipe` function');
+				if (opt.filename) filename = opt.filename;
+				if (opt.encoding) content_encoding = opt.encoding;
+				content_type = opt.type || 'application/octet-stream';
+				res.end(data);
+			},
 			send: (data) => {
 				if (typeof toSend !== 'undefined') {
 					throw "Already specified data to send";

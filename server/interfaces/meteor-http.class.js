@@ -136,6 +136,13 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			res.writeHead(code);
 			res.end();
 
+		} else if (typeof data.pipe === 'function') {
+
+			// Assuming a stream
+			res.setHeader('Content-Type', content_type);
+			res.writeHead(code);
+			data.pipe(res);
+
 		} else {
 
 			if (content_type === 'application/json') {
@@ -233,7 +240,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 				result.data = result.data.fetch();
 			}
-			if (typeof result.data !== 'undefined' && result.data !== null) {
+			if (typeof result.data.pipe !== 'function' && typeof result.data !== 'undefined' && result.data !== null) {
 				if (iface._transformers) {
 					iface._transformers.forEach(transformer => {
 						result.data = transformer.call(iface, result.data);
