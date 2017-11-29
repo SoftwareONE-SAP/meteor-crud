@@ -343,7 +343,9 @@ Crud.read('hello', function(req, res, next){
 });
 ```
 
-The raw content to send is the first argument. It can be a Buffer or an Array or a String. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `encoding` is optional, and describes the content encoding of the data if there is one. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces. Set `disposition` to "inline" if you want your Content-Disposition header to be different to "attachment".
+The raw content to send is the first argument. It can be a Buffer or an Array or a String or a [`Readable Stream`](https://nodejs.org/api/stream.html#stream_readable_streams)-like object which implements `pipe` functionality. `type` in the second argument is required. For the HTTP interface, this is used in the "Content-Type" header. For the Method and Publish interfaces, it is included in the response doc. `encoding` is optional, and describes the content encoding of the data if there is one. `filename` is optional. If it is specified, it is used in the Content-Disposition header for the HTTP interface, and is included in the response doc for the other interfaces. Set `disposition` to "inline" if you want your Content-Disposition header to be different to "attachment".
+
+If a Stream is provided, it will be piped directly to the HTTP response, but for the Method and Publish interfaces the Stream is converted into a buffer and sent in it's entirety. Warning: There is no maximum file size restriction for a stream, so in the case of the Method and Publish interfaces the entire file will be read into the server memory. It is recommended that Streams are only sent over the HTTP interface.
 
 If you want to redirect the user or return data which has the URL and the status code of the redirect you can use `res.redirect`,
 this function accepts two arguments `url` which is required & `status code` which is optional and by default it is 301.
