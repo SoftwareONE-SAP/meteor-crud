@@ -1,6 +1,9 @@
 /**
  *
  */
+const util    = Npm.require('util');
+const toArray = Npm.require('stream-to-array');
+
 MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 
 	name () { return 'Method' }
@@ -31,6 +34,11 @@ MeteorMethodInterface = class MeteorMethodInterface extends BaseInterface {
 				let result = handler(this, req);
 				if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 					result.data = result.data.fetch();
+				} else if (typeof result.data === 'object' && typeof result.data.pipe === 'function') {
+					result.data = toArray(result.data).then((parts) => {
+						const buffers = parts.map(part => util.isBuffer(part) ? part : Buffer.from(part));
+						return Buffer.concat(buffers);
+					});
 				}
 
 				if (typeof result.data !== 'undefined' && result.data !== null) {

@@ -1,6 +1,9 @@
 /**
  *
  */
+const util    = Npm.require('util');
+const toArray = Npm.require('stream-to-array');
+
 MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 	name () { return 'Publish' }
@@ -31,6 +34,20 @@ MeteorPublishInterface = class MeteorPublishInterface extends BaseInterface {
 
 					// Non JSON content
 					if (result.content_type !== 'application/json') {
+
+						// Process Buffers and transform
+						if (typeof result.data === 'object' && typeof result.data.pipe === 'function') {
+							result.data = toArray(result.data).then((parts) => {
+								const buffers = parts.map(part => util.isBuffer(part) ? part : Buffer.from(part));
+								return Buffer.concat(buffers);
+							});
+
+							if (iface._transformers) {
+								iface._transformers.forEach(transformer => {
+									result.data = transformer.call(iface, result.data);
+								});
+							}
+						}
 
 						let doc = {
 							type: result.content_type,

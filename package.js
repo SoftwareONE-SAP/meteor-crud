@@ -10,6 +10,7 @@ Npm.depends({
   'body-parser': '1.14.1',
   'content-disposition': '0.5.1',
   'multiparty': '4.1.2',
+  'stream-to-array': '2.3.0',
 })
 
 Package.onUse(function(api) {

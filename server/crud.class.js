@@ -158,8 +158,8 @@ CRUD = class CRUD {
 					data = new Buffer(data);
 				} else if (Array.isArray(data)) {
 					data = new Buffer(data);
-				} else if (!(data instanceof Buffer)) {
-					throw "sendBinary requires a Buffer, Array or String";
+				} else if (typeof data.pipe !== 'function' && !(data instanceof Buffer)) {
+					throw "sendBinary requires a Buffer, Array, String or a stream supporting `pipe`";
 				}
 
 				res.send(data);
