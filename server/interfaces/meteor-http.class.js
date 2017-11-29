@@ -240,7 +240,7 @@ MeteorHTTPInterface = class MeteorHTTPInterface extends BaseInterface {
 			if (typeof result.data === 'object' && typeof result.data.fetch === 'function') {
 				result.data = result.data.fetch();
 			}
-			if (typeof result.data.pipe !== 'function' && typeof result.data !== 'undefined' && result.data !== null) {
+			if (typeof result.data !== 'undefined' && result.data !== null && typeof result.data.pipe !== 'function') {
 				if (iface._transformers) {
 					iface._transformers.forEach(transformer => {
 						result.data = transformer.call(iface, result.data);

@@ -158,8 +158,8 @@ CRUD = class CRUD {
 					data = new Buffer(data);
 				} else if (Array.isArray(data)) {
 					data = new Buffer(data);
-				} else if (!(data instanceof Buffer)) {
-					throw "sendBinary requires a Buffer, Array or String";
+				} else if (typeof data.pipe !== 'function' && !(data instanceof Buffer)) {
+					throw "sendBinary requires a Buffer, Array, String or a stream supporting `pipe`";
 				}
 
 				res.send(data);
@@ -169,13 +169,6 @@ CRUD = class CRUD {
 				if (opt.disposition) disposition = opt.disposition;
 				if (opt.encoding) content_encoding = opt.encoding;
 				content_type = opt.type || 'application/octet-stream';
-			},
-			sendStream: (data, opt={}) => {
-				if (typeof data.pipe !== 'function') throw new Error('`data` is not streamable, missing `pipe` function');
-				if (opt.filename) filename = opt.filename;
-				if (opt.encoding) content_encoding = opt.encoding;
-				content_type = opt.type || 'application/octet-stream';
-				res.end(data);
 			},
 			send: (data) => {
 				if (typeof toSend !== 'undefined') {
